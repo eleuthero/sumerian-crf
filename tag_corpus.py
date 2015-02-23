@@ -558,9 +558,9 @@ def parse(args):
 args = init_parser()
 readLines()
 buildIndex()
+optimizeIndex(args)
 
 if args.dumpindex:
     dumpIndex(args)
 
-optimizeIndex(args)
 parse(args)
