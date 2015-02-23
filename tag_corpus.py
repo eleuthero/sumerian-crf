@@ -8,7 +8,6 @@ import fileinput
 from itertools import tee, izip
 from sys import stdout
 from collections import Counter
-
 # Lines read from input stream.
 # We'll be doing two passes over the input stream so we need to save
 # what we read.
@@ -378,7 +377,7 @@ def printWord(word, args):
             bestlem   = [ lem for lem in index[word] \
                               if bestcount == index[word][lem] ][0]
 
-            stdout.write( '$%s$ ' % formatLem(lem, args) )
+            stdout.write( '\t%s\n' % formatLem(lem, args) )
 
         else:
 
@@ -390,14 +389,14 @@ def printWord(word, args):
                 tokens.append('%s:%i' % (formatLem(lem, args),    # lem
                                          index[word][lem]))       # count
 
-            stdout.write( '$%s$ ' % ','.join(tokens) )
+            stdout.write( '\t%s\n' % ','.join(tokens) )
 
     else:
 
         # Word is not lemmatized anywhere in corpus.
         # Mark with X tag to signify unknown part of speech.
 
-        stdout.write('$X$ ')
+        stdout.write('\tX\n')
 
 def cleanWord(word):
 
@@ -473,7 +472,7 @@ def process(line, args):
 
         if line:
             if not args.bare:
-                stdout.write('<l> ')
+                stdout.write('<l>\n')
 
             """
             The lines of text may contain inline comments in the form
@@ -502,16 +501,16 @@ def process(line, args):
                     comment = False
 
             if not args.bare:
-                stdout.write('</l>')
+                stdout.write('</l>\n')
 
     else:
 
         # Entire line is a comment or directive.
 
+        """
         if not args.bare:
             stdout.write(line)
-
-    stdout.write('\n')
+        """
 
 def parse(args):
     global LINES
@@ -525,7 +524,9 @@ def parse(args):
         if line1.startswith('&'):
 
             # Starting a new tablet.  Restart accumulated lines.
+            # Emit blank line to delimit tablets.
 
+            stdout.write('\n')
             lines = list()
             lines.append(line1)
 
