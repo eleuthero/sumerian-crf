@@ -128,7 +128,6 @@ $(CORPUS_POSFREQUENCY_DIR)/gn.txt: \
 	cat $(CORPUS_BARETAGGED_FILE) \
 		| grep '\sGN$$' \
 		| awk 'BEGIN { FS="\t"; } { print $$1; }' \
-		| sed -e 's/{ki}.*/{ki}/g' \
 		> $(CORPUS_POSFREQUENCY_DIR)/gn.txt
 
 $(CORPUS_POSFREQUENCY_DIR)/gn_frequency.txt: \
