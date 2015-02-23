@@ -85,7 +85,8 @@ tagfreq: \
     $(CORPUS_POSFREQUENCY_DIR)/u_frequency.txt \
     $(CORPUS_POSFREQUENCY_DIR)/wn_frequency.txt \
     $(CORPUS_POSFREQUENCY_DIR)/w_frequency.txt \
-    $(CORPUS_POSFREQUENCY_DIR)/x_frequency.txt
+    $(CORPUS_POSFREQUENCY_DIR)/x_frequency.txt \
+    $(CORPUS_POSFREQUENCY_DIR)/notpn_frequency.txt
 
 $(CORPUS_POSFREQUENCY_DIR):
 
@@ -318,6 +319,29 @@ $(CORPUS_POSFREQUENCY_DIR)/w_frequency.txt: \
 
 	sort -k2.1 $(CORPUS_POSFREQUENCY_DIR)/w_frequency.txt \
 		> $(CORPUS_POSFREQUENCY_DIR)/w_sorted.txt
+
+# Not-PN frequency analysis.
+
+$(CORPUS_POSFREQUENCY_DIR)/notpn.txt: \
+	$(CORPUS_BARETAGGED_FILE)
+
+	cat $(CORPUS_POSFREQUENCY_DIR)/fn.txt \
+		$(CORPUS_POSFREQUENCY_DIR)/gn.txt \
+		$(CORPUS_POSFREQUENCY_DIR)/n.txt \
+		$(CORPUS_POSFREQUENCY_DIR)/on.txt \
+		$(CORPUS_POSFREQUENCY_DIR)/tn.txt \
+		$(CORPUS_POSFREQUENCY_DIR)/wn.txt \
+		> $(CORPUS_POSFREQUENCY_DIR)/notpn.txt
+
+$(CORPUS_POSFREQUENCY_DIR)/notpn_frequency.txt: \
+	$(CORPUS_POSFREQUENCY_DIR)/notpn.txt
+ 
+	cat $(CORPUS_POSFREQUENCY_DIR)/notpn.txt \
+		| sort | uniq -c | sort -rn \
+		> $(CORPUS_POSFREQUENCY_DIR)/notpn_frequency.txt
+ 
+	sort -k2.1 $(CORPUS_POSFREQUENCY_DIR)/notpn_frequency.txt \
+		> $(CORPUS_POSFREQUENCY_DIR)/notpn_sorted.txt
 
 
 # Cleanup
