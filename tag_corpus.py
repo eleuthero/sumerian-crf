@@ -8,6 +8,9 @@ import fileinput
 from itertools import tee, izip
 from sys import stdout
 from collections import Counter
+
+from tablet import Line
+
 # Lines read from input stream.
 # We'll be doing two passes over the input stream so we need to save
 # what we read.
@@ -17,26 +20,7 @@ LINES = list()
 # Index dictionary mapping words to their attested parts of speech and
 # the count for each of those POS.  
 
-index = { }              # { 'x': { 'u' : 0 } }
-noise = '[]!?#*<>'
-
-# Regular expressions used in massaging transliteration noise in lines.
-
-# Implied signs: <<...>> indicates that the transliterator believes that
-# the scribe has left out one or more signs.  These omitted signs will
-# not appear in the lemmatization and so we need to remove the implied
-# signs.
-
-re_impl = re.compile(r"\<\<([A-Za-z0-9-()/#?*{}|@+ ]+)\>\>") 
-
-re_slash = re.compile(r"(/)[^0-9]")
-
-# Word regex; if a word doesn't match this regex, just ignore it; don't
-# try to tag it.  This is necessary because of some transliterational typos,
-# especially in older tablets, to prevent noise like commas from appearing
-# as their own words.
-
-re_word = re.compile(r"[A-Za-z0-9-]")
+INDEX = { }              # { 'x': { 'u' : 0 } }
 
 # List of professions.  If the --pf switch is provided, any lemma
 # with the following roots will be marked with the PF part-of-speech
@@ -133,18 +117,19 @@ def init_parser():
                         action='store_true',
                         help='Include only lemmatized lines in output.')
 
+    parser.add_argument('--crf',
+                        action='store_true',
+                        help='Include some features for conditional ' \
+                             'random fields analysis.')
+
     parser.add_argument('--dumpindex',
                         type=str,
                         default='',
                         help='Writes a word/tag frequency matrix in CSV ' \
                              'format to the specified filename')
 
-    parser.add_argument('--tagsonly',
-                        action='store_true',
-                        help='Include only POS tags in output; do not ' \
-                             'include the source text.')
-
     return parser.parse_args()
+
 
 # Funny pattern for iterating via a pair of elements.
 # (0, 1), (1, 2), (2, 3), ... (n, None).
@@ -156,101 +141,6 @@ def pairwise(iter):
     next(b, None)
     return izip(a, b)
 
-class Line:
-    def __init__(self, line, lem):
-        self.line = line
-        self.lem = lem
-        self.words = { }
-        self.parse(line, lem)
-
-    def removeErasures(self, line):
-        start = line.find("!(")
-
-        # Obliterate any erased signs where they are specified; for instance,
-        # replace "ma-na!(KI)-ag2" with "ma-na!-ag2".  We'll deal with the
-        # remaining ! metacharater elsewhere.
-
-        while -1 != start:
-            end = line.find(")", start + 1)
-            if -1 != end:
-                line = line[:start + 1] + line[end + 1:]
-            start = line.find("!(")
-
-        return line;
-      
-    def clean(self, line, lem):
-
-        # Remove any independent comma tokens.
-
-        line = line.replace(' , ', ' ')
-
-        # Remove commas at the end of the line.
-
-        if line.endswith(','):
-            line = line[:-1]
-
-        # Delete any implied signs <<...>>.
-
-        line = re_impl.sub('', line)
-
-        # Replace s, (Akkadian soft sz) with sz.
-
-        line = line.replace('s,', 'sz')
-
-        # Remove any signs that were erased and corrected by the scribe.
-
-        line = self.removeErasures(line)
-
-        """
-        # Deal with slashes; they may be either " " or "-".
-        # Note: This has been commented out because the lemmata always
-        # treat "erroneous" slashes as sign separators, even when the
-        # signs are clearly meant to be word-broken, so there must be some
-        # lemmatization rule that is being adhered to that I just don't
-        # understand, as evidenced by the fact that the number of lemma tokens
-        # is always equal to the number of words in the line when there is
-        # a slash present.  We'll treat the slash as a sign separator.
-
-        m = re_slash.search(line)
-
-        if m:
-   
-            words  = [ s.strip().translate(None, '[]!?#*<>') \
-                       for s in line.split()[1:] ]
-            lemtok = [ s.strip()
-                       for s in lem.split(';') ]
-
-            stdout.write("!!! matched bad slash: %i %i %s\n" % \
-                         ( len(words), len(lemtok), line ))
-            # line = re_slash.sub('', line)
-        """
-            
-        return line
-
-    def parse(self, line, lem):
-
-        line = self.clean(line, lem)
-
-        words  = [ s.strip().translate(None, '[]!?#*<>') \
-                   for s in line.split()[1:] ]
-        lemtok = [ s.strip()
-                   for s in lem.split(';') ]
-
-        # Ensure same number of lemma tokens as words.
-
-        self.valid = ( len(words) == len(lemtok) )
-
-        if self.valid:
-            # print self.line
-            # print self.lem
-            for i in range(0, len(words)):
-                word = words[i]
-                tokens = lemtok[i]
-
-                self.words[word] = []
-                for element in tokens.split('|'):
-                    self.words[word].append(element)
-                    # print '    %s => %s' % (word, element)
 
 def readLines():
     global LINES
@@ -258,6 +148,7 @@ def readLines():
     LINES = list()
     for line in fileinput.input('-'):
         LINES.append(line)
+
 
 def buildIndex():
     global LINES
@@ -269,24 +160,23 @@ def buildIndex():
         # If we see a lemmatization ...
 
         if line2.startswith('#lem:'):
-            line = Line(line1, line2[5:])
+            line = Line(line1, line2)
             if line.valid:
-                for word in line.words:
+                for (word, _) in line.words:
 
-                    # Remove all transliteration noise first.
+                    if ':' == word:
+                        print 'line: {}'.format(line.line)
+                        print 'lem:  {}'.format(line.lem)
+                        raise
 
-                    word = word.translate(None, noise)
-
-                    if not word in index:
-                        index[word] = { }
+                    if not word in INDEX:
+                        INDEX[word] = Counter()
 
                     # Track lemma token count.
 
-                    for token in line.words[word]:
-                        if token in index[word]:
-                            index[word][token] += 1
-                        else:
-                            index[word][token] = 1
+                    for lem in line.get_lemmata(word):
+                        INDEX[word][lem] += 1
+
 
 def dumpIndex(args):
     if args.dumpindex:
@@ -295,8 +185,8 @@ def dumpIndex(args):
 
         with open(args.dumpindex, 'w') as fout:
             fout.write('{\n')
-            for word in sorted(index):
-                lemmata = dict( index[word] )
+            for word in sorted(INDEX):
+                lemmata = dict( INDEX[word] )
                 tags = Counter()
 
                 # If it's a lemma, such as "aga'us[soldier]", replace the
@@ -313,6 +203,7 @@ def dumpIndex(args):
             fout.write('}\n')
             fout.close()
 
+
 def optimizeIndex(args):
 
     if args.bestlemma:
@@ -320,190 +211,119 @@ def optimizeIndex(args):
         # Optimize index by throwing away all lemmata except for the
         # most attested one for each word.
 
-        for word in index:
-            bestcount = max([ index[word][lem] \
-                              for lem in index[word] ])
-            bestlem   = [ lem for lem in index[word] \
-                              if bestcount == index[word][lem] ][0]
-            index[word] = { }
-            index[word][bestlem] = bestcount
+        for word in INDEX:
 
-    else:
+            try:
+                (bestlem, bestcount) = INDEX[word].most_common(1)[0]
+            except IndexError:
+                print 'word:  {}'.format(word)
+                print 'index: {}'.format(INDEX[word])
+                raise
+            INDEX[word] = Counter()
+            INDEX[word][bestlem] = bestcount
 
-        # Order entries in index by lemma count.
 
-        """
-        for word in index:
-            dict = sorted(index[word], key=index[word].get)
-            n = index[word]
-            index[word] = { }
-            for token in dict:
-                index[word][token] = n[token]
-        """
+def formatLems(lems, args):
+    f = [ ]
 
-def formatLem(lem, args):
-
-    if ('[' in lem) and (']' in lem):
-
-        if args.pf:
-            if lem in professions:
-                return 'PF'
+    for lem in lems:
+        if ('[' in lem) and (']' in lem):
+            if args.pf:
+                if lem in professions:
+                    lem = 'PF'
+            if args.nogloss:
+                lem = 'W'
+        f.append(lem)
         
-        if args.nogloss:
-            return 'W'
+    return ','.join(f)
 
-    return lem
 
-def printWord(word, args):
+def printCrf(line, word, args):
 
-    # Check to make sure the word is not noise (such as a bare comma).
-    # If it is, just bail.
+    # Print raw lemma tag.  May include gloss, even when
+    # --nogloss switch is provided.
 
-    if not re_word.search(word):
-        return
+    stdout.write( '\t"{}/{}"'.format( word,
+                                      '|'.join(line.get_lemmata(word)) ))
 
-    # If we're not just emitting part of speech tags, emit the word.
+    # Print line context.
 
-    if not args.tagsonly:
-        stdout.write(word)
+    stdout.write( '\t"{}"'.format(line.line) )
 
-    if word in index:
-        if args.bestlemma:
+    # Print boolean feature, 1 if word is PN, 0 if not.
 
-            # We want to show only the best lemma for this word ...
-
-            bestcount = max([ index[word][lem] \
-                              for lem in index[word] ])
-            bestlem   = [ lem for lem in index[word] \
-                              if bestcount == index[word][lem] ][0]
-
-            stdout.write( '\t%s\n' % formatLem(lem, args) )
-
-        else:
-
-            # Show all lemmata for this word.
-
-            tokens = [ ]
-
-            for lem in index[word]:
-                tokens.append('%s:%i' % (formatLem(lem, args),    # lem
-                                         index[word][lem]))       # count
-
-            stdout.write( '\t%s\n' % ','.join(tokens) )
-
+    if 'PN' in line.get_lemmata(word):
+        stdout.write( '\t{}'.format(1) )
     else:
+        stdout.write( '\t{}'.format(0) )
+    
+    # Print most common tag for this word.
+
+    if word in INDEX:
+        (bestlem, _) = INDEX[word].most_common(1)[0]
+    else:
+        bestlem = 'X'
+
+    stdout.write('\t{}'.format( formatLems([ bestlem ], args) ))
+
+
+def getLem(line, word, args):
+
+    if not word in INDEX:
 
         # Word is not lemmatized anywhere in corpus.
         # Mark with X tag to signify unknown part of speech.
 
-        stdout.write('\tX\n')
+        lems = [ 'X' ]
 
-def cleanWord(word):
+    else:
 
-    # Remove all transliteration noise.
-    
-    word = word.translate(None, noise)
+        lems = line.get_lemmata(word)
 
-    # [...] indicates the loss of an indeterminate number of
-    # signs.  Reduce this to x, a single lost sign, for our
-    # purposes.
+        if len(lems) > 1:
+            if args.bestlemma:
 
-    word = re.sub(r'\.\.\.', 'x', word)
+                # Show only the best lemma for this word.
 
-    # There is some additional transliteration noise in the
-    # form of bare colons.  I'm not sure what they mean, but
-    # they are consistently lemmatized as X, so they're not
-    # merely typos.  Let's remove them.
-
-    if ':' == word:
-        return None
-
-    """
-    # Replace : and . signs (indiciating sign metathesis) with the normal
-    # hyphen sign separator.  This is not linguistically defensible, but
-    # it's close enough for our immediate purposes.
-
-    word = re.sub('[.:]', '-', word)
-    """
-
-    return word
-
-def cleanLine(line):
-
-    if '_' in line:
-
-        # _ occurs in lemmata for Akkadian signs; if we see this anywhere
-        # in the line, we need different rules to parse the entire line.
-        # We didn't sign up for that.
-
-        return None
-
-    words = None
-
-    # Skip first word in the line; that's a line number.
-
-    for word in line.split(' ')[1:]:
-        word = cleanWord(word)
-
-        if word:
-            if ('%a' == word) or ('=' == word):
-
-                # This indicates the language has switched (probably to
-                # Akkadian) for the rest of the line.  Stop parsing this
-                # and any following signs in this line.
-
-                break
+                lems = [ INDEX[word].most_common(1)[0][0] ]
 
             else:
 
-                words = words or list()
-                words.append(word)
+                # Show all lemmata.
 
-    return words
+                lems = INDEX[word]
+
+    return formatLems(lems, args)
+
+
+def printWord(line, word, args):
+
+    # Token 0: word
+
+    stdout.write(word)
+
+    # CRF fields, if requested.
+
+    if args.crf:
+        printCrf(line, word, args)
+
+    # Final token: lem with which this word was tagged.
+
+    stdout.write( '\t{}\n'.format( getLem(line, word, args) ))
+
 
 def process(line, args):
 
-    if len(line) > 0 and not line[0] in '&$@#':
+    """
+    print
+    print 'valid: {}'.format(line.valid)
+    print 'dmg:   {}'.format(line.damaged)
+    print 'line:  {}'.format(line.line)
+    print 'lem:   {}'.format(line.lem)
+    print 'words: {}'.format(line.words)
+    """
 
-        # Clean the line up; there are signs that may cause us to stop
-        # processing subsequent signs.
-
-        line = cleanLine(line)
-
-        if line:
-            if not args.bare:
-                stdout.write('<l>\n')
-
-            """
-            The lines of text may contain inline comments in the form
-            ($ ... $).  Oddly, the individual tokens in the inline comments
-            are lemmatized individually:
-
-            ki ($ blank space $)-ta
-            ki[place]; X; X; X; X
-
-            so we don't want to use a regex to remove the comments; rather,
-            we'll just look for the inline comment delimiters and use the
-            to set a processing flag.  Any signs interrupted by one of these
-            inline comments (like the remaining -ta above) become noise
-            in the lemma and we'll ignore them.
-            """
-           
-            comment = False
-            for word in line:
-                if '($' in word:
-                    comment = True
-                
-                if not comment:
-                    printWord(word, args)
-
-                if '$)' in word:
-                    comment = False
-
-            if not args.bare:
-                stdout.write('</l>\n')
-
-    else:
+    if not line.lem:
 
         # Entire line is a comment or directive.
 
@@ -511,6 +331,17 @@ def process(line, args):
         if not args.bare:
             stdout.write(line)
         """
+        return
+
+    if not args.bare:
+        stdout.write('<l>\n')
+
+    for (word, _) in line.words:
+        printWord(line, word, args)
+
+    if not args.bare:
+        stdout.write('</l>\n')
+
 
 def parse(args):
     global LINES
@@ -528,7 +359,7 @@ def parse(args):
 
             stdout.write('\n')
             lines = list()
-            lines.append(line1)
+            lines.append( Line(line1, None) )
 
         elif line1.startswith('#lem:'):
 
@@ -537,7 +368,7 @@ def parse(args):
             pass
 
         else:
-            lines.append(line1)
+            lines.append( Line(line1, line2) )
 
         # End of tablet ?
 
@@ -558,6 +389,7 @@ def parse(args):
 
 args = init_parser()
 readLines()
+
 buildIndex()
 optimizeIndex(args)
 

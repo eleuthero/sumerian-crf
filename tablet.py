@@ -1,144 +1,276 @@
 #!/usr/bin/python
 
-from itertools import tee, izip
-import repr
-
-LINES = { }
-WORDS = { }
-
-class Tablet:
-    def __init__(self, lines):
-        self.lines = list()
-        self.parse(lines)
-
-    def pairwise(self, iter):
-        a, b = tee(iter)
-        next(b, None)
-        return izip(a, b)
-
-    def parse(self, lines):
-        self.name = lines.pop(0)[1:8]
-        for line1, line2 in self.pairwise(lines):
-            if line2:
-                self.test(line1.strip(), line2.strip())
-        self.valid = ( len(self.lines) > 0)
-
-    def test(self, line1, line2):
-        global LINES
-
-        if line2.startswith('#lem:'):
-            l = Line(line1, line2[5:])
-            if l.valid:
-                self.lines.append(l)
-                if not line1 in LINES:
-                    LINES[line1] = l
+import re
 
 class Line:
+
+    COMMENT = '&$@#'
+
+    NOISE = '[]!?#*<>'
+
+    # Regular expressions used in massaging transliteration noise in lines.
+
+    re_slash = re.compile(r"(/)[^0-9]")
+
+    """
+    Word regex; if a word doesn't match this regex, just ignore it; don't
+    try to tag it.  This is necessary because of some transliterational
+    typos, especially in older tablets, to prevent noise like commas from
+    appearing as their own words.
+    """
+
+    re_word = re.compile(r"[A-Za-z0-9-]")
+
+    """
+    Implied signs: <<...>> indicates that the transliterator believes that
+    the scribe has left out one or more signs.  These omitted signs will
+    not appear in the lemmatization and so we need to remove the implied
+    signs.
+    """
+
+    re_impl = re.compile(r"\<\<([A-Za-z0-9-()/#?*{}|@+ ]+)\>\>")
+
+        
+    """
+    __init__():
+    ===========
+    Constructor.
+    ===========
+    Accepts:
+        line:   Line from tablet.
+        lem:    Corresponding lemma for line.  If line is a comment,
+                    lem may be None.
+    ===========
+    """
     def __init__(self, line, lem):
         self.line = line
-        self.words = list()
-        self.parse(line, lem)
+        self.lem = lem
+        self.valid = None
+        self.damaged = False
 
-    def parse(self, line, lem):
-        global WORDS
+        if lem:
 
-        words        = [ s.strip() for s in line.split(' ')[1:] ]
-        lemtokensets = [ s.strip() for s in  lem.split(';') ]
+            # The first five characters of a lemma line are "#lem:";
+            # ignore these.
 
-        """
-        assert len(words) == len(lemtokensets), \
-               'tokenization mismatch:\n\t(%2i) : %s\n\t(%2i) : %s' \
-               % (len(words), words, len(lemtokensets), lemtokensets)
-        """
+            self.lem = lem[5:]
 
-        self.valid = ( len(words) == len(lemtokensets) )
+        self.words = [ ]
+        self.parse()
+
+
+    def get_lemmata(self, word):
+        for (w, lemmata) in self.words:
+            if word == w:
+                return lemmata
+        return None
+
+
+    def parse(self):
+
+        if not self.lem:
+            self.valid = True
+            return
+
+        if self.line[0] in Line.COMMENT:
+            self.valid = True
+            self.lem = None
+            return
+
+        if '_' in self.line:
+
+            # _ occurs in lemmata for Akkadian signs; if we see this
+            # anywhere in the line, we need different rules to parse the
+            # entire line.  We didn't sign up for that.
+
+            self.valid = False
+            self.lem = None
+            return
+
+        self.line = self.clean(self.line, self.lem)
+
+        # words = [ s.strip().translate(None, Line.NOISE) \
+        words = [ s.strip()
+                  for s in self.line.split() ]
+        lemtok = [ s.strip()
+                   for s in self.lem.split(';') ]
+
+        # Ensure same number of lemma tokens as words.
+
+        self.valid = ( len(words) == len(lemtok) )
 
         if self.valid:
+
+            comment = False
+
             for i in range(len(words)):
-                word = Word( words[i], lemtokensets[i] )
-                if word.valid:
-                    self.words.append(word)
+                word = words[i]
+                tokens = lemtok[i]
 
-                    if not word.word in WORDS:
-                        WORDS[word.word] = word
-                    else:
-                        attest = WORDS[word.word]
-                        attest.count += 1
+                if ('%a' == word) or ('=' == word):
 
-                        l = [ str(rule) for rule in attest.lem.rules ]
-                        for rule in word.lem.rules:
-                            if not str(rule) in l:
-                                attest.lem.rules.append(rule)
+                    # This indicates that the language has switched
+                    # (most likely to Akkadian) for the rest of the line.
+                    # Stop parsing this line at this point.
 
-class Word:
-    def __init__(self, word, lemtokenset):
-        self.word  = word
-        self.count = 1
-        self.lem   = Lemma(lemtokenset)
-        self.valid = self.lem.valid
+                    break
 
-    """
-    def __eq__(self, other):
-        return isinstance(other, self.__class__)  \
-            and (self.word == other.word) \
-            and (self.lem == other.lem)
+                # There is some additional transliteration noise in
+                # the form of bare colons.  I'm not sure what they
+                # mean, but they are consistently lemmatized as X,
+                # so they're not merely typos.  Let's remove them.
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
-    """
+                if (':' == word):
+                    continue
 
-class Lemma:
-    def __init__(self, tokens):
-        self.rules = list()
-        self.parse(tokens)
-     
-    def parse(self, tokens):
-        self.valid = True
-        for token in tokens.split('|'):
-            if '[' in token:
-                lemma = LemmaRoot(token)
-                if lemma.valid: 
-                    self.rules.append(lemma)
-                else:
-                    self.valid = False
-            else:
-                lemma = LemmaTag(token)
-                if lemma.valid:
-                    self.rules.append(lemma)
-                else:
-                    self.valid = False
+                """
+                The lines of text may contain inline comments in the form
+                ($ ... $).  Oddly, the individual tokens in the inline
+                comments are lemmatized individually:
 
-    """
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and (self.rules == other.rules)
+                ki ($ blank space $)-ta
+                ki[place]; X; X; X; X
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
-    """
-    
-class LemmaTag:
-    def __init__(self, tag):
-        self.tag   = tag 
-        self.valid = True
+                so we don't want to use a regex to remove the comments;
+                rather, we'll just look for the inline comment delimiters
+                and use the to set a processing flag.  Any signs
+                interrupted by one of these inline comments (like the
+                remaining -ta above) become noise in the lemma and we'll
+                ignore them.
+                """
 
-    def __str__(self):
-        return self.tag
-        
-class LemmaRoot:
-    def __init__(self, root):
-        tokens = root.replace(']', '').split('[')
+                if '($' in word:
+                    comment = True
+
+                if '$)' in word:
+                    comment = False
+                    continue
+
+                if comment:
+                    continue
+
+                elements = [ ]
+                self.words.append( (word, elements) )
+                for element in tokens.split('|'):
+
+                    # Tag the word with the lemma token.
+
+                    elements.append(element)
+
+                    # A ``u'' token generally indicates unlemmatizability
+                    # due to damage.
+
+                    if 'u' == element:
+                        self.damaged = True
+
+
+    def removeAdditions(self, line):
+
+        """
+        Sometimes, scribes will leave out words that are implied by 
+        context, or may simply have left out a word that the transliterator
+        felt was recoverable from context.  For example,
+
+        mu ha-ar-szi{ki} <<masz>> ki-masz{ki} ba-hul
+        #lem: mu[year]; GN; GN; hulu[destroy]
+
+        However, since these words aren't in the original text, any such
+        additions by the transliterator are not lemmatized; as such,
+        remove them from the line.
+        """
+
+        start = line.find("<<")
+        while -1 != start:
+            end = line.find(">>", start + 1)
+            if -1 != end:
+                line = line[:start + 1] + line[end + 1:]
+            start = line.find("<<")
+
+        return line;
+
+
+    def removeErasures(self, line):
+        start = line.find("!(")
+
+        # Obliterate any erased signs where they are specified; for instance,
+        # replace "ma-na!(KI)-ag2" with "ma-na!-ag2".  We'll deal with the
+        # remaining ! metacharacter elsewhere.
+
+        while -1 != start:
+            end = line.find(")", start + 1)
+            if -1 != end:
+                line = line[:start + 1] + line[end + 1:]
+            start = line.find("!(")
+
+        return line;
+      
+    def clean(self, line, lem):
+
+        # Remove first word from line.
+
+        line = ' '.join( [ word for word
+                           in line.split(' ') ]
+                         [1:] )
+
+        # Remove any independent comma tokens.
+
+        line = line.replace(' , ', ' ')
+
+        # Remove commas at the end of the line.
+
+        if line.endswith(','):
+            line = line[:-1]
+
+        # Delete any implied signs <<...>>.
+
+        line = Line.re_impl.sub('', line)
+
+        # Replace s, (Akkadian soft sz) with sz.
+
+        line = line.replace('s,', 'sz')
+
+        # Remove any signs that were erased and corrected by the scribe.
+
+        line = self.removeErasures(line)
+
+        # Remove any signs that were omitted by the scribe but added by
+        # the transliterator.
+
+        line = self.removeAdditions(line)
+
+        # [...] indicates the loss of an indeterminate number of
+        # signs.  Reduce this to x, a single lost sign, for our purposes.
+
+        line = re.sub(r'\.\.\.', 'x', line)
+
+        """
+        # Deal with slashes; they may be either " " or "-".
+        # Note: This has been commented out because the lemmata always
+        # treat "erroneous" slashes as sign separators, even when the
+        # signs are clearly meant to be word-broken, so there must be some
+        # lemmatization rule that is being adhered to that I just don't
+        # understand, as evidenced by the fact that the number of lemma tokens
+        # is always equal to the number of words in the line when there is
+        # a slash present.  We'll treat the slash as a sign separator.
+
+        m = Line.re_slash.search(line)
+
+        if m:
+   
+            words  = [ s.strip().translate(None, '[]!?#*<>') \
+                       for s in line.split()[1:] ]
+            lemtok = [ s.strip()
+                       for s in lem.split(';') ]
+
+            stdout.write("!!! matched bad slash: %i %i %s\n" % \
+                         ( len(words), len(lemtok), line ))
+            # line = Line.re_slash.sub('', line)
+        """
             
-        assert 2 == len(tokens), \
-            "Encountered more than just a root and gloss in lemma root."
+        # Now that we're done with all of the processing of the line,
+        # make one last cleaning pass on it to remove all of the
+        # transliteration noise.
 
-        if (2 == len(tokens)):
-            self.root  = tokens[0].strip()
-            self.gloss = tokens[1].strip()
-            self.valid = True
-        else:
-            self.valid = False
-            print "~lem: ", root
+        line = line.translate(None, Line.NOISE)
 
-    def __str__(self):
-        return "%s = %s" % (self.root, self.gloss)
+        return line

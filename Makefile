@@ -17,12 +17,13 @@ CORPUS_RNGSEED=1
 
 CORPUS_LEMMA_FILE=./cdli_atffull_lemma.atf
 CORPUS_TAGGED_FILE=./cdli_atffull_tagged.atf
+CORPUS_TAGGED_CRF_FILE=./cdli_atffull_tagged_crf.atf
 CORPUS_WORDTAGFREQ_FILE=./cdli_atffull_wordtagfreq.txt
 CORPUS_POSFREQUENCY_DIR=./pos_frequency
 CORPUS_BARETAGGED_FILE=$(CORPUS_POSFREQUENCY_DIR)/cdli_atffull_bare.atf
 
 
-all: corpus tagfreq 
+all: corpus tagfreq tagcrf
 
 # Generate corpus
 # ===============
@@ -66,6 +67,12 @@ $(CORPUS_TAGGED_FILE): $(CORPUS_LEMMA_FILE)
 		> $(CORPUS_TAGGED_FILE)
 
 
+tagcrf: $(CORPUS_LEMMA_FILE)
+
+	cat $(CORPUS_LEMMA_FILE) \
+		| python ./tag_corpus.py \
+			--nogloss --bestlemma --crf \
+		> $(CORPUS_TAGGED_CRF_FILE)
 
 # Corpus statistics by part of speech.
 # ====================================
@@ -349,6 +356,7 @@ $(CORPUS_POSFREQUENCY_DIR)/notpn_frequency.txt: \
 clean:
 	rm -f $(CORPUS_LEMMA_FILE)
 	rm -f $(CORPUS_TAGGED_FILE)
+	rm -f $(CORPUS_TAGGED_CRF_FILE)
 	rm -f $(CORPUS_WORDTAGFREQ_FILE)
 	rm -f $(CORPUS_BARETAGGED_FILE)
 	rm -rf $(CORPUS_POSFREQUENCY_DIR)
