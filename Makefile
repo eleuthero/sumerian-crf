@@ -23,7 +23,7 @@ CORPUS_POSFREQUENCY_DIR=./pos_frequency
 CORPUS_BARETAGGED_FILE=$(CORPUS_POSFREQUENCY_DIR)/cdli_atffull_bare.atf
 
 
-all: corpus tagfreq tagcrf
+all: corpus tagfreq tagcrf $(CORPUS_WORDTAGFREQ_FILE)
 
 # Generate corpus
 # ===============
@@ -63,9 +63,15 @@ $(CORPUS_TAGGED_FILE): $(CORPUS_LEMMA_FILE)
 	cat $(CORPUS_LEMMA_FILE) \
 		| python ./tag_corpus.py \
 			--nogloss --bestlemma --pf \
-			--dumpindex $(CORPUS_WORDTAGFREQ_FILE) \
 		> $(CORPUS_TAGGED_FILE)
 
+$(CORPUS_WORDTAGFREQ_FILE): $(CORPUS_LEMMA_FILE)
+
+	cat $(CORPUS_LEMMA_FILE) \
+		| python ./tag_corpus.py \
+			--nogloss --pf \
+			--dumpindex $(CORPUS_WORDTAGFREQ_FILE) \
+		> /dev/null
 
 tagcrf: $(CORPUS_LEMMA_FILE)
 
