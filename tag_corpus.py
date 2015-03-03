@@ -10,6 +10,10 @@ from sys import stdout
 from collections import Counter
 
 from tablet import Line
+from context import Context
+
+# TODO: Remove INDEX
+# TODO: Remove args.bestlemma [except maybe for dumpindex]
 
 # Lines read from input stream.
 # We'll be doing two passes over the input stream so we need to save
@@ -238,37 +242,7 @@ def formatLems(lems, args):
     return ','.join(f)
 
 
-def printCrf(line, word, args):
-
-    # Print raw lemma tag.  May include gloss, even when
-    # --nogloss switch is provided.
-
-    stdout.write( '\t"{}/{}"'.format( word,
-                                      '|'.join(line.get_lemmata(word)) ))
-
-    # Print line context.
-
-    stdout.write( '\t"{}"'.format(line.line) )
-
-    # Print boolean feature, 1 if word is PN, 0 if not.
-
-    if 'PN' in line.get_lemmata(word):
-        stdout.write( '\t{}'.format(1) )
-    else:
-        stdout.write( '\t{}'.format(0) )
-    
-    # Print most common tag for this word.
-
-    if word in INDEX:
-        (bestlem, _) = INDEX[word].most_common(1)[0]
-    else:
-        bestlem = 'X'
-
-    stdout.write('\t{}'.format( formatLems([ bestlem ], args) ))
-
-
-def getLem(line, word, args):
-
+def getLem(line, word, args): 
     if not word in INDEX:
 
         # Word is not lemmatized anywhere in corpus.
@@ -296,7 +270,7 @@ def getLem(line, word, args):
     return formatLems(lems, args)
 
 
-def printWord(line, word, args):
+def printWord(line, index, word, args):
 
     # Token 0: word
 
@@ -305,7 +279,7 @@ def printWord(line, word, args):
     # CRF fields, if requested.
 
     if args.crf:
-        printCrf(line, word, args)
+        Context.write(line, index, word, args)
 
     # Final token: lem with which this word was tagged.
 
@@ -336,8 +310,8 @@ def process(line, args):
     if not args.bare:
         stdout.write('<l>\n')
 
-    for (word, _) in line.words:
-        printWord(line, word, args)
+    for (index, (word, _)) in enumerate(line.words):
+        printWord(line, index, word, args)
 
     if not args.bare:
         stdout.write('</l>\n')
