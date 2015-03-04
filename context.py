@@ -72,7 +72,6 @@ class Context:
                       '\tStarts with ur-'
                       '\tStarts with lu2-'
                       '\tEnds with -mu'
-                      '\tContains {ki}'
                       '\tContains {d}'
                       '\tContains {ki}'
                       '\tContains any determinative'
