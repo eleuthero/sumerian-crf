@@ -320,6 +320,9 @@ def process(line, args):
 def parse(args):
     global LINES
 
+    if args.crf:
+        Context.write_header()
+
     for line1, line2 in pairwise(LINES):
         line1 = line1.strip()
         line2 = line2.strip()
