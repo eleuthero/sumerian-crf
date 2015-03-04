@@ -26,76 +26,6 @@ LINES = list()
 
 INDEX = { }              # { 'x': { 'u' : 0 } }
 
-# List of professions.  If the --pf switch is provided, any lemma
-# with the following roots will be marked with the PF part-of-speech
-# tag.
-
-professions = [
-                "aga'us[soldier]",
-                "arad[slave]",
-                "aszgab[leatherworker]",
-                "azlag[fuller]",
-                "bahar[potter]",
-                "bisajdubak[archivist]",
-                "damgar[merchant]",
-                "dikud[judge]",
-                "dubsar[scribe]",
-                "en[priest]",
-                "ereszdijir[priestess]",
-                "ensik[ruler]",
-                "engar[farmer]",
-                "enkud[tax-collector]",
-                "gaba'asz[courier]",
-                "galamah[singer]",
-                "gala[singer]",
-                "geme[worker]",
-                "gudug[priest]",
-                "guzala[official]",
-                "idu[doorkeeper]",
-                "iszib[priest]",
-                "kaguruk[supervisor]",
-                "kasz[runner]",
-                "kijgia[messenger]",
-                "kinkin[miller]",
-                "kuruszda[fattener]",        # (of animals)
-                "kusz[official]",
-                "lu2-mar-sa-me[unknown]",
-                "lugal[king]",
-                "lukur[priestess]",
-                "lungak[brewer]",
-                "malah[sailor]",
-                "maszkim[administrator]",
-                "muhaldim[cook]",
-                "muszendu[bird-catcher]",
-                "nagada[herdsman]",
-                "nagar[carpenter]",
-                "nar[musician]",
-                "nin[lady]",
-                "nubanda[overseer]",
-                "nukirik[horticulturalist]",
-                "sajDUN[recorder]",
-                "sajja[official]",
-                "simug[smith]",
-                "sipad[shepherd]",
-                "sukkal[secretary]",
-                "szabra[administrator]",
-                "szagia[cup-bearer]",
-                "szakkanak[general]",
-                "szej[cook]",
-                "szesz[brother]",
-                "szidim[builder]",
-                "szu'i[barber]",
-                "szukud[fisherman]",
-                "tibira[sculptor]",
-                "ugula[overseer]",
-                "unud[cowherd]",
-                "urin[guard]",
-                "ujjaja[porter]",
-                "uszbar[weaver]",
-                "zabardab[official]",
-                "zadim[stone-cutter]"
-              ]
-
 # Initializer arg parser.
 
 def init_parser():
@@ -233,7 +163,7 @@ def formatLems(lems, args):
     for lem in lems:
         if ('[' in lem) and (']' in lem):
             if args.pf:
-                if lem in professions:
+                if lem in Context.professions:
                     lem = 'PF'
             if args.nogloss:
                 lem = 'W'

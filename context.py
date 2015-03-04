@@ -5,6 +5,75 @@ from sys import stdout
 
 class Context:
 
+    # List of common professions in the Ur III corpus.
+
+    professions = [
+                "aga'us[soldier]",
+                "arad[slave]",
+                "aszgab[leatherworker]",
+                "azlag[fuller]",
+                "bahar[potter]",
+                "bisajdubak[archivist]",
+                "damgar[merchant]",
+                "dikud[judge]",
+                "dubsar[scribe]",
+                "en[priest]",
+                "ereszdijir[priestess]",
+                "ensik[ruler]",
+                "engar[farmer]",
+                "enkud[tax-collector]",
+                "gaba'asz[courier]",
+                "galamah[singer]",
+                "gala[singer]",
+                "geme[worker]",
+                "gudug[priest]",
+                "guzala[official]",
+                "idu[doorkeeper]",
+                "iszib[priest]",
+                "kaguruk[supervisor]",
+                "kasz[runner]",
+                "kijgia[messenger]",
+                "kinkin[miller]",
+                "kuruszda[fattener]",        # (of animals)
+                "kusz[official]",
+                "lu2-mar-sa-me[unknown]",
+                "lugal[king]",
+                "lukur[priestess]",
+                "lungak[brewer]",
+                "malah[sailor]",
+                "maszkim[administrator]",
+                "muhaldim[cook]",
+                "muszendu[bird-catcher]",
+                "nagada[herdsman]",
+                "nagar[carpenter]",
+                "nar[musician]",
+                "nin[lady]",
+                "nubanda[overseer]",
+                "nukirik[horticulturalist]",
+                "sajDUN[recorder]",
+                "sajja[official]",
+                "simug[smith]",
+                "sipad[shepherd]",
+                "sukkal[secretary]",
+                "szabra[administrator]",
+                "szagia[cup-bearer]",
+                "szakkanak[general]",
+                "szej[cook]",
+                "szesz[brother]",
+                "szidim[builder]",
+                "szu'i[barber]",
+                "szukud[fisherman]",
+                "tibira[sculptor]",
+                "ugula[overseer]",
+                "unud[cowherd]",
+                "urin[guard]",
+                "ujjaja[porter]",
+                "uszbar[weaver]",
+                "zabardab[official]",
+                "zadim[stone-cutter]"
+              ]
+
+
     @staticmethod
     def get_left_context(line, index, word, args, offset = 1):
 
@@ -69,6 +138,12 @@ class Context:
                       '\tFirst syllable repeated'
                       '\tLast syllable repeated'
                       '\tAny syllable repeated'
+                      '\tIs profession'
+                      '\tContains profession'
+                      '\tLeft Context is profession'
+                      '\tLeft Context contains profession'
+                      '\tRight Context is profession'
+                      '\tRight Context contains profession'
                       '\tStarts with ur-'
                       '\tStarts with lu2-'
                       '\tEnds with -mu'
@@ -88,13 +163,32 @@ class Context:
                       
 
     @staticmethod
-    def test(tests):
+    def test_all(tests):
         for t in tests:
             if not t:
-                stdout.write( '\t{}'.format(0) )
+                Context.test_fail()
                 return
+        Context.test_pass()
+
+
+    @staticmethod
+    def test_any(tests):
+        for t in tests:
+            if t:
+                Context.test_pass()
+                return
+        Context.test_fail()
+
+    
+    @staticmethod
+    def test_pass():
         stdout.write( '\t{}'.format(1) )
 
+
+    @staticmethod
+    def test_fail():
+        stdout.write( '\t{}'.format(0) )
+        
 
     @staticmethod
     def write(line, index, word, args):
@@ -140,132 +234,180 @@ class Context:
 
         # Is word alone on line ?
 
-        Context.test([ (leftcx, rightcx) == (None, None) ])
+        Context.test_all([ (leftcx, rightcx) == (None, None) ])
         
         # Left context is dumu.
 
-        Context.test([ (leftcx == 'dumu') ])
+        Context.test_all([ (leftcx == 'dumu') ])
 
         # Right context is dumu.
 
-        Context.test([ (rightcx == 'dumu') ])
+        Context.test_all([ (rightcx == 'dumu') ])
 
         # ^ ki <word> $
 
-        Context.test([ (leftcx2, leftcx, rightcx) == (None, 'ki', None) ])
+        Context.test_all([ (leftcx2, leftcx, rightcx) == (None, 'ki', None) ])
             
         # ^ igi <word> $
 
-        Context.test([ (leftcx2, leftcx, rightcx) == (None, 'igi', None) ])
+        Context.test_all([ (leftcx2, leftcx, rightcx) == (None, 'igi', None) ])
 
         # ^ igi <word>-sze $
 
-        Context.test([ (leftcx2, leftcx, rightcx) == (None, 'igi', None),
-                        word.endswith('-sze3') ])
+        Context.test_all([ (leftcx2, leftcx, rightcx) == (None, 'igi', None),
+                           word.endswith('-sze3') ])
 
         # Personnenkeil: ^ 1(disz) <word> $
 
-        Context.test([ (leftcx2, leftcx, rightcx) == (None, '1(disz)', None) ])
+        Context.test_all([ (leftcx2, leftcx, rightcx) == (None, '1(disz)', None) ])
 
         # ^ kiszib3 <word> $
 
-        Context.test([ (leftcx2, leftcx, rightcx) == (None, 'kiszib3', None) ])
+        Context.test_all([ (leftcx2, leftcx, rightcx) == (None, 'kiszib3', None) ])
 
         # ^ jiri3 <word> $
 
-        Context.test([ (leftcx2, leftcx, rightcx) == (None, 'jiri3', None) ])
+        Context.test_all([ (leftcx2, leftcx, rightcx) == (None, 'jiri3', None) ])
 
         # First syllable repeated
 
         if len(signs) > 1:
-            Context.test([ signs[0] == signs[1] ])
+            Context.test_all([ signs[0] == signs[1] ])
         else:
-            Context.test([ False ])
+            Context.test_fail()
 
         # Last syllable repeated
 
         signs = word.split('-')
         if len(signs) > 1:
-            Context.test([ signs[-2] == signs[-1] ])
+            Context.test_all([ signs[-2] == signs[-1] ])
         else:
-            Context.test([ False ])
+            Context.test_fail()
 
         # Any syllable repeated
 
         if len(signs) > 1:
-            Context.test([ True in [ a == b for (a, b)
-                                     in zip(signs, signs[1:]) ] ])
+            Context.test_any([ a == b for (a, b)
+                               in zip(signs, signs[1:]) ])
         else:
-            Context.test([ False ])
+            Context.test_fail()
+
+        # Is profession
+
+        Context.test_any([ pf == lemmata 
+                           for pf in Context.professions ])
+
+        # Contains profession
+
+        Context.test_any([ pf in lem 
+                           for lem in lemmata
+                           for pf in Context.professions ])
+
+        # Left context is profession
+
+        if leftlem:
+            Context.test_any([ pf == lem
+                               for lem in leftlem
+                               for pf in Context.professions ])
+        else:
+            Context.test_fail()
+
+        # Left context contains profession
+
+        if leftlem:
+            Context.test_any([ pf in lem
+                               for lem in leftlem
+                               for pf in Context.professions ])
+        else:
+            Context.test_fail()
+
+        # Right context is profession
+
+        if rightlem:
+            Context.test_any([ pf == lem
+                               for lem in rightlem 
+                               for pf in Context.professions ])
+        else:
+            Context.test_fail()
+
+
+        # Right context contains profession
+
+        if rightlem:
+            Context.test_any([ pf in lem
+                               for lem in rightlem
+                               for pf in Context.professions ])
+        else:
+            Context.test_fail()
 
         # Starts with ur-
 
-        Context.test([ word.startswith('ur-') ])
+        Context.test_all([ word.startswith('ur-') ])
         
         # Starts with lu2-
 
-        Context.test([ word.startswith('lu2-') ])
+        Context.test_all([ word.startswith('lu2-') ])
         
         # Ends with -mu
 
-        Context.test([ word.endswith('-mu') ])
+        Context.test_all([ word.endswith('-mu') ])
         
         # Contains {d}
 
-        Context.test([ '{d}' in word ])
+        Context.test_all([ '{d}' in word ])
 
         # Contains {ki}
 
-        Context.test([ '{ki}' in word ])
+        Context.test_all([ '{ki}' in word ])
 
         # Contains any determinative
 
-        Context.test([ '{' in word ])
+        Context.test_all([ '{' in word ])
 
         # Contains q sound
 
-        Context.test([ 'q' in word ])
+        Context.test_all([ 'q' in word ])
 
         # Contains lugal
 
-        Context.test([ 'lugal' in word ])
+        Context.test_all([ 'lugal' in word ])
 
         # Contains numeric elements
 
-        Context.test([ '(asz)' in word \
-                       or '(disz)' in word \
-                       or '(u)' in word ])
+        Context.test_any([ '(asz)' in word,
+                           '(disz)' in word,
+                           '(u)' in word ])
 
         # Followed by sag
 
-        Context.test([ rightcx == 'sag' ])
+        Context.test_all([ rightcx == 'sag' ])
 
         # Followed by zarin
 
-        Context.test([ rightcx == 'zarin' ])
+        Context.test_all([ rightcx == 'zarin' ])
 
         # Preceded by numeric classifier
 
-        Context.test([ leftcx in ( 'ba-an', 'ba-ri2-ga', 'bur3', 'da-na',
-                                   'gin2-tur', 'gin2', 'gur-lugal', 
-                                   'gur-sag-gal2', 'gur', 'iku', 'GAN2',
-                                   'ku-li-mu', 'ku-li-kam', 'kusz3',
-                                   'sar', 'sila3' ) ])
+        Context.test_all([ leftcx in ( 'ba-an', 'ba-ri2-ga', 'bur3', 'da-na',
+                                       'gin2-tur', 'gin2', 'gur-lugal', 
+                                       'gur-sag-gal2', 'gur', 'iku', 'GAN2',
+                                       'ku-li-mu', 'ku-li-kam', 'kusz3',
+                                       'sar', 'sila3' ) ])
 
         # iti at head of sentence
 
-        Context.test([ 'iti' == line.words[0][0] ])
+        Context.test_all([ 'iti' == line.words[0][0] ])
 
         # mu at head of sentence
 
-        Context.test([ 'mu' == line.words[0][0] ])
+        Context.test_all([ 'mu' == line.words[0][0] ])
 
         # Print boolean feature, 1 if word is PN, 0 if not.
 
         if 'PN' in lemmata:
-            stdout.write( '\t{}'.format(1) )
+            Context.test_pass()
         else:
-            stdout.write( '\t{}'.format(0) )
+            Context.test_fail()
 
         """
         # Print most common tag for this word.
