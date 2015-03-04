@@ -58,6 +58,8 @@ class Context:
                       '\tRight Context Lemma'
                       '\tLine Context'
                       '\tIs Word Alone On Line'
+                      '\tLeft context is dumu'
+                      '\tRight context is dumu'
                       '\tNone ki (word) None'
                       '\tNone igi (word) None'
                       '\tNone igi (word)-sze3 None'
@@ -67,6 +69,10 @@ class Context:
                       '\tFirst syllable repeated'
                       '\tLast syllable repeated'
                       '\tAny syllable repeated'
+                      '\tStarts with ur-'
+                      '\tStarts with lu2-'
+                      '\tEnds with -mu'
+                      '\tContains {ki}'
                       '\tContains {d}'
                       '\tContains {ki}'
                       '\tContains any determinative'
@@ -137,6 +143,14 @@ class Context:
 
         Context.test([ (leftcx, rightcx) == (None, None) ])
         
+        # Left context is dumu.
+
+        Context.test([ (leftcx == 'dumu') ])
+
+        # Right context is dumu.
+
+        Context.test([ (rightcx == 'dumu') ])
+
         # ^ ki <word> $
 
         Context.test([ (leftcx2, leftcx, rightcx) == (None, 'ki', None) ])
@@ -185,6 +199,18 @@ class Context:
         else:
             Context.test([ False ])
 
+        # Starts with ur-
+
+        Context.test([ word.startswith('ur-') ])
+        
+        # Starts with lu2-
+
+        Context.test([ word.startswith('lu2-') ])
+        
+        # Ends with -mu
+
+        Context.test([ word.endswith('-mu') ])
+        
         # Contains {d}
 
         Context.test([ '{d}' in word ])
