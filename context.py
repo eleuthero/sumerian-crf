@@ -294,21 +294,22 @@ class Context:
 
         # Is profession
 
-        Context.test_any([ pf == lemmata 
-                           for pf in Context.professions ])
+        Context.test_any([ pf == lem
+                           for pf in Context.professions
+                           for lem in lemmata ])
 
         # Contains profession
 
         Context.test_any([ pf in lem 
-                           for lem in lemmata
-                           for pf in Context.professions ])
+                           for pf in Context.professions
+                           for lem in lemmata ])
 
         # Left context is profession
 
         if leftlem:
             Context.test_any([ pf == lem
-                               for lem in leftlem
-                               for pf in Context.professions ])
+                               for pf in Context.professions
+                               for lem in line.get_lemmata(leftcx) ])
         else:
             Context.test_fail()
 
@@ -316,8 +317,8 @@ class Context:
 
         if leftlem:
             Context.test_any([ pf in lem
-                               for lem in leftlem
-                               for pf in Context.professions ])
+                               for pf in Context.professions
+                               for lem in line.get_lemmata(leftcx) ])
         else:
             Context.test_fail()
 
@@ -325,18 +326,17 @@ class Context:
 
         if rightlem:
             Context.test_any([ pf == lem
-                               for lem in rightlem 
-                               for pf in Context.professions ])
+                               for pf in Context.professions
+                               for lem in line.get_lemmata(rightcx) ])
         else:
             Context.test_fail()
-
 
         # Right context contains profession
 
         if rightlem:
             Context.test_any([ pf in lem
-                               for lem in rightlem
-                               for pf in Context.professions ])
+                               for pf in Context.professions
+                               for lem in line.get_lemmata(rightcx) ])
         else:
             Context.test_fail()
 
