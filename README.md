@@ -16,13 +16,7 @@ Further things to note:
   - In cases where more than one lemma is associated with a word, only the most commonly attributed lemma for that word is included in the tag.  For instance, in some tablets, the word `{d}dumu-zi-[sze3]` is given as `DN|MN|FN`, meaning that the word can appear in any of those contexts.  When multiple lemmata are available for a single word, only the most frequently attested one will be used.
   - Common professions will be replaced with the synthetic tag `PF`, which does not occur in the lemmata.
 
-- *cdli_atffull_tagged_crf.csv*: This is most likely to be the file of most immediate use.  It extends the fields in *cdli_atffull_tagged.atf* by including the following tab-delimited fields:
-  - Word, with any transliteration noise removed
-  - Citation form/gloss.  You may choose to ignore this; it is provided for readability by humans with some familiarity with the language.
-  - Line context.  Every word in the current line is provided; transliteration noise has been removed.
-  - Boolean PN indicator.  1 if the current word is lemmatized as a personal name (PN); 0 if not.
-  - Most frequent tag for this word.  This is usually also the tag provided by the lemmata, but not always.
-  - Tag for this word provided by the lemmata.
+- *cdli_atffull_crf_train.csv* and *cdli_atffull_crf_test.csv*: These are most likely to be the files of most immediate use.  They are a training and a testing corpus that extend the fields in *cdli_atffull_tagged.atf* by including many feature values as tab-delimited fields.  See below for a full description of all features used by this script.  By default, the training set is 80% of the lemmatized Ur III corpus, and the testing set 20%.  Part of speech tags (from which the PN/non-PN tag for each word can be deduced) are left in the training corpus to allow you to gauge the F-measure of your algorithm.
 
 - *cdli_atffull_wordtagfreq.txt*: a sorted list of all words appearing in the corpus and the frequency with which the tags for these words appear.  Presented in JSON format.
 
@@ -59,7 +53,7 @@ boolean   | 1 if word starts with **ur-**.  This is common in personal names.
 boolean   | 1 if word starts with **lu2-**.  This is common in personal names, but is also common in other contexts.
 boolean   | 1 if word ends with **-mu**.  This is common in personal names, but is also common in other contexts.
 boolean   | 1 if word contains **{d}**, (short for **dingir** "*deity*") the divine determinative.  Personal names strongly favor such theophoric elements but usually include other signs as well.
-boolean   | 1 if word contains **{ki}** "*place*".  In formal Sumerian, all city names contain this sign (unless the scribe omits it), but personal names may also contain this sign (cf. "Leonardo "*da Vinci*).
+boolean   | 1 if word contains **{ki}** "*place*".  In formal Sumerian, all city names contain this sign (unless the scribe omits it), but personal names may also contain this sign (cf. Leonardo *da Vinci*).
 boolean   | 1 if word contains any determinative.
 boolean   | 1 if word's transliteration contains the letter *q*.  This sign (which has phonetic value of *qoppa*) is not native to Sumerian.
 boolean   | 1 if word contains **lugal** ("*king*; *large*").  Sumerian names favor elements of praise to the king, but **lugal** appears in many other contexts as well.
