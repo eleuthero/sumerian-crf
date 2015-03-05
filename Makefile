@@ -11,13 +11,13 @@ CORPUS_FILE_ZIP=./cdli_atffull.zip
 CORPUS_FILE_URL= http://www.cdli.ucla.edu/tools/cdlifiles/$(CORPUS_FILE_ZIP)
 CORPUS_FILE=./cdli_atffull.atf
 
-CORPUS_TRAINING_PERCENT=85
-CORPUS_COUNT=1
-CORPUS_RNGSEED=1
 
 CORPUS_LEMMA_FILE=./cdli_atffull_lemma.atf
 CORPUS_TAGGED_FILE=./cdli_atffull_tagged.atf
 CORPUS_TAGGED_CRF_FILE=./cdli_atffull_tagged_crf.csv
+CORPUS_TAGGED_CRF_TRAIN_FILE=./cdli_atffull_train_crf.csv
+CORPUS_TAGGED_CRF_TEST_FILE=./cdli_atffull_test_crf.csv
+CORPUS_TRAINING_PERCENT=80
 CORPUS_WORDTAGFREQ_FILE=./cdli_atffull_wordtagfreq.txt
 CORPUS_POSFREQUENCY_DIR=./pos_frequency
 CORPUS_BARETAGGED_FILE=$(CORPUS_POSFREQUENCY_DIR)/cdli_atffull_bare.atf
@@ -73,12 +73,32 @@ $(CORPUS_WORDTAGFREQ_FILE): $(CORPUS_LEMMA_FILE)
 			--dumpindex $(CORPUS_WORDTAGFREQ_FILE) \
 		> /dev/null
 
-tagcrf: $(CORPUS_LEMMA_FILE)
+tagcrf: \
+	$(CORPUS_TAGGED_CRF_TRAIN_FILE) \
+	$(CORPUS_TAGGED_CRF_TEST_FILE)
+
+$(CORPUS_TAGGED_CRF_TRAIN_FILE) $(CORPUS_TAGGED_CRF_TEST_FILE): \
+	$(CORPUS_TAGGED_CRF_FILE)
+	
+	cat $(CORPUS_TAGGED_CRF_FILE) \
+		| python ./partition_corpus.py \
+			--train $(CORPUS_TAGGED_CRF_TRAIN_FILE) \
+			--test $(CORPUS_TAGGED_CRF_TEST_FILE) \
+			--percent $(CORPUS_TRAINING_PERCENT)
+
+	# Done with this file; we just needed to split it up into a
+	# training and a testing corpus.  Can remove it now, especially
+	# since it's quite a sizable file.
+
+	rm -f $(CORPUS_TAGGED_CRF_FILE)
+
+$(CORPUS_TAGGED_CRF_FILE): $(CORPUS_LEMMA_FILE)
 
 	cat $(CORPUS_LEMMA_FILE) \
 		| python ./tag_corpus.py \
 			--nogloss --bestlemma --crf \
 		> $(CORPUS_TAGGED_CRF_FILE)
+
 
 # Corpus statistics by part of speech.
 # ====================================
@@ -374,6 +394,8 @@ clean:
 	rm -f $(CORPUS_LEMMA_FILE)
 	rm -f $(CORPUS_TAGGED_FILE)
 	rm -f $(CORPUS_TAGGED_CRF_FILE)
+	rm -f $(CORPUS_TAGGED_CRF_TRAIN_FILE)
+	rm -f $(CORPUS_TAGGED_CRF_TEST_FILE)
 	rm -f $(CORPUS_WORDTAGFREQ_FILE)
 	rm -f $(CORPUS_BARETAGGED_FILE)
 	rm -rf $(CORPUS_POSFREQUENCY_DIR)
