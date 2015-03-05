@@ -8,19 +8,19 @@ To use, run `make all` at the command line.  The following files will be downloa
 
 - *cdli_atffull_lemma.atf*: The portion of the CDLI sources that have been lemmatized extracted into a single file.  This is an intermediate step for further processing, but you may find the interlinear lemmata to be useful for your own purposes.
 
-- *cdli_atffull_tagged.atf*: A file in which each word of each lemmatized tablet is rendered on its own line along with the part of speech with which it was tagged in the lemmata, delimited by tabs.  Lines on a tablet are delimited by the special tokens `<l>` to begin a line and `</l>` to end it; tablets are delimited by blank spaces.
-
-Further things to note:
-  - No comments or tablet metadata appear in this file.
-  - Glosses are suppressed in this file; any word with a citation form is rendered with the synthetic tag `W`, which does not appear in the lemmata.  For instance, the gloss `geme[worker]` appearing in the lemmata is replaced with the tag `W`.
-  - In cases where more than one lemma is associated with a word, only the most commonly attributed lemma for that word is included in the tag.  For instance, in some tablets, the word `{d}dumu-zi-[sze3]` is given as `DN|MN|FN`, meaning that the word can appear in any of those contexts.  When multiple lemmata are available for a single word, only the most frequently attested one will be used.
-  - Common professions will be replaced with the synthetic tag `PF`, which does not occur in the lemmata.
+- *cdli_atffull_tagged.atf*: A file in which each word of each lemmatized tablet is rendered on its own line along with the part of speech with which it was tagged in the lemmata, delimited by tabs.  Lines on a tablet are delimited by the special tokens **&lt;l&gt;** to begin a line and **&lt;/l&gt;** to end it; tablets are delimited by blank spaces.
 
 - *cdli_atffull_crf_train.csv* and *cdli_atffull_crf_test.csv*: These are most likely to be the files of most immediate use.  They are a training and a testing corpus that extend the fields in *cdli_atffull_tagged.atf* by including many feature values as tab-delimited fields.  See below for a full description of all features used by this script.  By default, the training set is 80% of the lemmatized Ur III corpus, and the testing set 20%.  Part of speech tags (from which the PN/non-PN tag for each word can be deduced) are left in the training corpus to allow you to gauge the F-measure of your algorithm.
 
 - *cdli_atffull_wordtagfreq.txt*: a sorted list of all words appearing in the corpus and the frequency with which the tags for these words appear.  Presented in JSON format.
 
 - *pos_frequency/*: a directory containing per-tag word inventory and related frequency analysis presented for your convenience.  Per-tag analysis is provided, as well as all-word and non-PN analysis.
+
+Further things to note:
+  - No comments or tablet metadata appear in this file.
+  - Glosses are suppressed in this file; any word with a citation form is rendered with the synthetic tag **W**, which does not appear in the lemmata.  For instance, the gloss **geme[worker]** appearing in the lemmata is replaced with the tag **W**.
+  - In cases where more than one lemma is associated with a word, only the most commonly attributed lemma for that word is included in the tag.  For instance, in some tablets, the word **{d}dumu-zi-[sze3]** is given as **DN|MN|FN**, meaning that the word can appear in any of those contexts.  When multiple lemmata are available for a single word, only the most frequently attested one will be used.
+  - Common professions will be replaced with the synthetic tag **PF**, which does not occur in the lemmata.
 
 ## Features in *cdli_atffull_tagged_crf.csv*
 
