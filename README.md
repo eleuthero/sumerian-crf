@@ -39,7 +39,7 @@ boolean   | 1 if line context is **igi _word_**.  This may suggest a witness to 
 boolean   | 1 if line context is **igi _word_-sze3**.  This may suggest a witness to a transaction.
 boolean   | 1 if line context is the Personnenkeil **1(disz) _word_**.  This may suggest a list of named individuals.
 boolean   | 1 if line context is **kiszib3 _word_**.  This may suggest the individual responsible for sealing a tablet.
-boolean   | 1 if line context is **jiri3 _word_**.  This may suggest a named intermediary in a transaction doing business on behalf of another.
+boolean   | 1 if line context is **giri3 _word_**.  This may suggest a named intermediary in a transaction doing business on behalf of another.
 boolean   | 1 if first sign in word is repeated (implies that word contains more than one sign).  Sumerian names tend to favor repeated syllables.
 boolean   | 1 if last sign in word is repeated (implies that word contains more than one sign).  Sumerian names tend to favor repeated syllables.
 boolean   | 1 if any sign in word is repeated (implies that word contains more than one sign).  Sumerian names tend to favor repeated syllables.
