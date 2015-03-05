@@ -17,7 +17,7 @@ CORPUS_RNGSEED=1
 
 CORPUS_LEMMA_FILE=./cdli_atffull_lemma.atf
 CORPUS_TAGGED_FILE=./cdli_atffull_tagged.atf
-CORPUS_TAGGED_CRF_FILE=./cdli_atffull_tagged_crf.atf
+CORPUS_TAGGED_CRF_FILE=./cdli_atffull_tagged_crf.csv
 CORPUS_WORDTAGFREQ_FILE=./cdli_atffull_wordtagfreq.txt
 CORPUS_POSFREQUENCY_DIR=./pos_frequency
 CORPUS_BARETAGGED_FILE=$(CORPUS_POSFREQUENCY_DIR)/cdli_atffull_bare.atf
@@ -99,7 +99,8 @@ tagfreq: \
     $(CORPUS_POSFREQUENCY_DIR)/wn_frequency.txt \
     $(CORPUS_POSFREQUENCY_DIR)/w_frequency.txt \
     $(CORPUS_POSFREQUENCY_DIR)/x_frequency.txt \
-    $(CORPUS_POSFREQUENCY_DIR)/notpn_frequency.txt
+    $(CORPUS_POSFREQUENCY_DIR)/notpn_frequency.txt \
+    $(CORPUS_POSFREQUENCY_DIR)/determinatives.txt \
 
 $(CORPUS_POSFREQUENCY_DIR):
 
@@ -355,6 +356,16 @@ $(CORPUS_POSFREQUENCY_DIR)/notpn_frequency.txt: \
 	sort -k2.1 $(CORPUS_POSFREQUENCY_DIR)/notpn_frequency.txt \
 		> $(CORPUS_POSFREQUENCY_DIR)/notpn_sorted.txt
 
+# Determinative frequency analysis.
+
+$(CORPUS_POSFREQUENCY_DIR)/determinatives.txt: \
+	$(CORPUS_BARETAGGED_FILE)
+
+	cat $(CORPUS_BARETAGGED_FILE) \
+		| sed -e 's/{/\n{/g' \
+		| sed -e 's/}/}\n/g' \
+		| grep '[{}]' | sort | uniq -c | sort -rn \
+		> $(CORPUS_POSFREQUENCY_DIR)/determinatives.txt
 
 # Cleanup
 # =======
