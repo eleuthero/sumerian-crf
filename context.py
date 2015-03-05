@@ -119,12 +119,12 @@ class Context:
 
     @staticmethod
     def write_header():
-        stdout.write( '\tWord/Lemma'
+        stdout.write( '\tWord/Lemma (Do not use!)'
                       '\tWord Index'
                       '\tLeft Context Word'
-                      '\tLeft Context Lemma'
+                      # '\tLeft Context Lemma'
                       '\tRight Context Word'
-                      '\tRight Context Lemma'
+                      # '\tRight Context Lemma'
                       '\tLine Context'
                       '\tIs Word Alone On Line'
                       '\tLeft context is dumu'
@@ -158,7 +158,7 @@ class Context:
                       '\tPreceded by numeric classifier'
                       '\titi at head of sentence'
                       '\tmu at head of sentence'
-                      '\tIs PN'
+                      # '\tIs PN'
                       '\n' )
                       
 
@@ -218,15 +218,13 @@ class Context:
 
         stdout.write( '\t{}'.format(index) )
 
-        # Left context and tag.
+        # Left context.
 
-        stdout.write( '\t{}\t{}'.format( leftcx,
-                                         Context.format_context(leftlem) ))
+        stdout.write( '\t{}'.format(leftcx) )
 
-        # Right context and tag.
+        # Right context.
 
-        stdout.write( '\t{}\t{}'.format( rightcx,
-                                         Context.format_context(rightlem) ))
+        stdout.write( '\t{}'.format(rightcx) )
 
         # Print line context.
 
@@ -246,11 +244,13 @@ class Context:
 
         # ^ ki <word> $
 
-        Context.test_all([ (leftcx2, leftcx, rightcx) == (None, 'ki', None) ])
+        Context.test_all([ (leftcx2, leftcx, rightcx) == \
+                           (None, 'ki', None) ])
             
         # ^ igi <word> $
 
-        Context.test_all([ (leftcx2, leftcx, rightcx) == (None, 'igi', None) ])
+        Context.test_all([ (leftcx2, leftcx, rightcx) == \
+                           (None, 'igi', None) ])
 
         # ^ igi <word>-sze $
 
@@ -259,15 +259,18 @@ class Context:
 
         # Personnenkeil: ^ 1(disz) <word> $
 
-        Context.test_all([ (leftcx2, leftcx, rightcx) == (None, '1(disz)', None) ])
+        Context.test_all([ (leftcx2, leftcx, rightcx) == \
+                           (None, '1(disz)', None) ])
 
         # ^ kiszib3 <word> $
 
-        Context.test_all([ (leftcx2, leftcx, rightcx) == (None, 'kiszib3', None) ])
+        Context.test_all([ (leftcx2, leftcx, rightcx) == \
+                           (None, 'kiszib3', None) ])
 
         # ^ jiri3 <word> $
 
-        Context.test_all([ (leftcx2, leftcx, rightcx) == (None, 'jiri3', None) ])
+        Context.test_all([ (leftcx2, leftcx, rightcx) == \
+                           (None, 'jiri3', None) ])
 
         # First syllable repeated
 
@@ -402,6 +405,7 @@ class Context:
 
         Context.test_all([ 'mu' == line.words[0][0] ])
 
+        """
         # Print boolean feature, 1 if word is PN, 0 if not.
 
         if 'PN' in lemmata:
@@ -409,7 +413,6 @@ class Context:
         else:
             Context.test_fail()
 
-        """
         # Print most common tag for this word.
 
         # Actually, don't print the most common tag for this word.
@@ -423,6 +426,5 @@ class Context:
         else:
         bestlem = 'X'
 
-        stdout.write('\t{}'.format( formatLems([ bestlem ], args) )) """
-
-
+        stdout.write('\t{}'.format( formatLems([ bestlem ], args) ))
+        """
