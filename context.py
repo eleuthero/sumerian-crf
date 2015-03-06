@@ -134,7 +134,7 @@ class Context:
                       '\tNone igi (word)-sze3 None'
                       '\tPersonnenkeil'
                       '\tNone kiszib3 (word)'
-                      '\tNone jiri3 (word)'
+                      '\tNone giri3 (word)'
                       '\tFirst syllable repeated'
                       '\tLast syllable repeated'
                       '\tAny syllable repeated'
@@ -267,10 +267,10 @@ class Context:
         Context.test_all([ (leftcx2, leftcx, rightcx) == \
                            (None, 'kiszib3', None) ])
 
-        # ^ jiri3 <word> $
+        # ^ giri3 <word> $
 
         Context.test_all([ (leftcx2, leftcx, rightcx) == \
-                           (None, 'jiri3', None) ])
+                           (None, 'giri3', None) ])
 
         # First syllable repeated
 
