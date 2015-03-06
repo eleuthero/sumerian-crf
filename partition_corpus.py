@@ -12,14 +12,14 @@ def init_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--train',
-						type = str,
-						required = True,
+                        type = str,
+                        required = True,
                         help='File to which to write training portion '
                              'of corpus from stdin.')
 
     parser.add_argument('--test',
-						type = str,
-						required = True,
+                        type = str,
+                        required = True,
                         help='File to which to write testing portion '
                              'of corpus from stdin.')
 
@@ -27,7 +27,7 @@ def init_parser():
                         type = int,
                         default = 80,
                         help='Percentage of input corpus to allocate to '
-						     'training corpus.')
+                             'training corpus.')
 
     return parser.parse_args()
 
