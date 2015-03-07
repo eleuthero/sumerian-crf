@@ -98,10 +98,12 @@ def buildIndex():
             if line.valid:
                 for (word, _) in line.words:
 
+                    """
                     if ':' == word:
                         print 'line: {}'.format(line.line)
                         print 'lem:  {}'.format(line.lem)
                         raise
+                    """
 
                     if not word in INDEX:
                         INDEX[word] = Counter()

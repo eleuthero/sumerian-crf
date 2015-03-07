@@ -23,7 +23,7 @@ CORPUS_POSFREQUENCY_DIR=./pos_frequency
 CORPUS_BARETAGGED_FILE=$(CORPUS_POSFREQUENCY_DIR)/cdli_atffull_bare.atf
 
 
-all: corpus tagfreq tagcrf $(CORPUS_WORDTAGFREQ_FILE)
+all: corpus tagfreq tagcrf baseline $(CORPUS_WORDTAGFREQ_FILE)
 
 # Generate corpus
 # ===============
@@ -99,6 +99,11 @@ $(CORPUS_TAGGED_CRF_FILE): $(CORPUS_LEMMA_FILE)
 			--nogloss --bestlemma --crf \
 		> $(CORPUS_TAGGED_CRF_FILE)
 
+baseline: tagcrf
+
+	python ./baseline.py \
+		--train $(CORPUS_TAGGED_CRF_TRAIN_FILE) \
+		--test $(CORPUS_TAGGED_CRF_TEST_FILE)
 
 # Corpus statistics by part of speech.
 # ====================================
