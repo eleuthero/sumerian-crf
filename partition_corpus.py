@@ -36,6 +36,11 @@ def partition(args):
     ftrain = open(args.train, 'w')
     ftest = open(args.test, 'w')
 
+    # Make sure that testing output file starts with a blank line.
+    # Testing output file has a header that will include that line for us.
+
+    ftest.write('\n')
+
     g = gcd(100, 100 - args.percent)
     (trainmax, testmax) = ( args.percent / g, (100 - args.percent) / g )
 
@@ -45,12 +50,23 @@ def partition(args):
     for line in fileinput.input('-'):
         fout.write(line)
 
-        count -= 1
-        if 0 == count:
-            if fout == ftrain:
-                (fout, count) = (ftest, testmax)
-            else:
-                (fout, count) = (ftrain, trainmax)
+        # Only switch between writing to ftrain and ftest at the end
+        # of a tablet.
+
+        if '\n' == line:
+            count -= 1
+            if 0 == count:
+                if fout == ftrain:
+                    (fout, count) = (ftest, testmax)
+                else:
+                    (fout, count) = (ftrain, trainmax)
+
+    # Make sure that each output file ends with a blank line.
+
+    if fout == ftrain:
+        ftrain.write('\n')
+    else:
+        ftest.write('\n')
 
     ftrain.close()
     ftest.close()

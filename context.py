@@ -159,7 +159,7 @@ class Context:
                       '\titi at head of sentence'
                       '\tmu at head of sentence'
                       # '\tIs PN'
-                      '\n' )
+                      '\n\n' )
                       
 
     @staticmethod

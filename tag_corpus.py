@@ -273,6 +273,7 @@ def parse(args):
 
             # Starting a new tablet.  Process accumulated lines.
 
+            stdout.write('\n')
             for line in lines:
                 process(line, args)
 
