@@ -255,31 +255,19 @@ def parse(args):
     if args.crf:
         Context.write_header()
 
+    lines = [ ]
+
     for line1, line2 in pairwise(LINES):
         line1 = line1.strip()
         line2 = line2.strip()
 
-        # Accumulate lines.
+        # Accumulate a line if the line isn't a comment and is
+        # followed by a lemma.
 
-        if line1.startswith('&'):
-
-            # Starting a new tablet.  Restart accumulated lines.
-            # Emit blank line to delimit tablets.
-
-            stdout.write('\n')
-            lines = list()
-            lines.append( Line(line1, None) )
-
-        elif line1.startswith('#lem:'):
-
-            # Lemma.  We've already built the lemmata index; skip this.
-
-            pass
-
-        else:
+        if line1[0] not in '&#$@' and line2.startswith('#lem:'):
             lines.append( Line(line1, line2) )
 
-        # End of tablet ?
+        # Are we at the end of a tablet ?
 
         if line2.startswith('&'):
 
@@ -290,7 +278,7 @@ def parse(args):
 
             # Restart accumulated lines.
 
-            lines = list()
+            lines = [ ]
 
 # ====
 # Main
