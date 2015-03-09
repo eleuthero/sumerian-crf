@@ -23,7 +23,8 @@ CORPUS_POSFREQUENCY_DIR=./pos_frequency
 CORPUS_BARETAGGED_FILE=$(CORPUS_POSFREQUENCY_DIR)/cdli_atffull_bare.atf
 
 
-all: corpus tagfreq tagcrf baseline $(CORPUS_WORDTAGFREQ_FILE)
+# all: corpus tagfreq tagcrf baseline $(CORPUS_WORDTAGFREQ_FILE)
+all: corpus tagfreq tagcrf $(CORPUS_WORDTAGFREQ_FILE)
 
 # Generate corpus
 # ===============
