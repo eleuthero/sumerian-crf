@@ -16,7 +16,8 @@ CORPUS_LEMMA_FILE=./cdli_atffull_lemma.atf
 CORPUS_TAGGED_FILE=./cdli_atffull_tagged.atf
 CORPUS_TAGGED_CRF_FILE=./cdli_atffull_tagged_crf.csv
 CORPUS_TAGGED_CRF_TRAIN_FILE=./cdli_atffull_train_crf.csv
-CORPUS_TAGGED_CRF_TEST_FILE=./cdli_atffull_test_crf.csv
+CORPUS_TAGGED_CRF_TEST1_FILE=./cdli_atffull_test1_crf.csv
+CORPUS_TAGGED_CRF_TEST2_FILE=./cdli_atffull_test2_crf.csv
 CORPUS_TRAINING_PERCENT=80
 CORPUS_WORDTAGFREQ_FILE=./cdli_atffull_wordtagfreq.txt
 CORPUS_POSFREQUENCY_DIR=./pos_frequency
@@ -76,22 +77,26 @@ $(CORPUS_WORDTAGFREQ_FILE): $(CORPUS_LEMMA_FILE)
 
 tagcrf: \
 	$(CORPUS_TAGGED_CRF_TRAIN_FILE) \
-	$(CORPUS_TAGGED_CRF_TEST_FILE)
+	$(CORPUS_TAGGED_CRF_TEST1_FILE) \
+	$(CORPUS_TAGGED_CRF_TEST2_FILE)
 
-$(CORPUS_TAGGED_CRF_TRAIN_FILE) $(CORPUS_TAGGED_CRF_TEST_FILE): \
+$(CORPUS_TAGGED_CRF_TRAIN_FILE) \
+$(CORPUS_TAGGED_CRF_TEST1_FILE) \
+$(CORPUS_TAGGED_CRF_TEST2_FILE): \
 	$(CORPUS_TAGGED_CRF_FILE)
-	
+
 	cat $(CORPUS_TAGGED_CRF_FILE) \
 		| python ./partition_corpus.py \
 			--train $(CORPUS_TAGGED_CRF_TRAIN_FILE) \
-			--test $(CORPUS_TAGGED_CRF_TEST_FILE) \
+			--test-remove-damage $(CORPUS_TAGGED_CRF_TEST1_FILE) \
+			--test-permit-damage $(CORPUS_TAGGED_CRF_TEST2_FILE) \
 			--percent $(CORPUS_TRAINING_PERCENT)
 
 	# Done with this file; we just needed to split it up into a
 	# training and a testing corpus.  Can remove it now, especially
 	# since it's quite a sizable file.
 
-	rm -f $(CORPUS_TAGGED_CRF_FILE)
+	# rm -f $(CORPUS_TAGGED_CRF_FILE)
 
 $(CORPUS_TAGGED_CRF_FILE): $(CORPUS_LEMMA_FILE)
 
@@ -100,11 +105,17 @@ $(CORPUS_TAGGED_CRF_FILE): $(CORPUS_LEMMA_FILE)
 			--nogloss --bestlemma --crf \
 		> $(CORPUS_TAGGED_CRF_FILE)
 
+	echo >> $(CORPUS_TAGGED_CRF_FILE)
+
 baseline: tagcrf
 
 	python ./baseline.py \
 		--train $(CORPUS_TAGGED_CRF_TRAIN_FILE) \
-		--test $(CORPUS_TAGGED_CRF_TEST_FILE)
+		--test $(CORPUS_TAGGED_CRF_TEST1_FILE)
+
+	python ./baseline.py \
+		--train $(CORPUS_TAGGED_CRF_TRAIN_FILE) \
+		--test $(CORPUS_TAGGED_CRF_TEST2_FILE)
 
 # Corpus statistics by part of speech.
 # ====================================
@@ -401,7 +412,8 @@ clean:
 	rm -f $(CORPUS_TAGGED_FILE)
 	rm -f $(CORPUS_TAGGED_CRF_FILE)
 	rm -f $(CORPUS_TAGGED_CRF_TRAIN_FILE)
-	rm -f $(CORPUS_TAGGED_CRF_TEST_FILE)
+	rm -f $(CORPUS_TAGGED_CRF_TEST1_FILE)
+	rm -f $(CORPUS_TAGGED_CRF_TEST2_FILE)
 	rm -f $(CORPUS_WORDTAGFREQ_FILE)
 	rm -f $(CORPUS_BARETAGGED_FILE)
 	rm -rf $(CORPUS_POSFREQUENCY_DIR)
