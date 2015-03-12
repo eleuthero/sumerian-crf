@@ -47,6 +47,7 @@ class Line:
         self.lem = lem
         self.valid = None
         self.damaged = False
+        self.damaged_and_tagged = False
 
         if lem:
 
@@ -60,6 +61,7 @@ class Line:
 
 
     def get_lemmata(self, word):
+
         for (w, lemmata) in self.words:
             if word == w:
                 return lemmata
@@ -89,7 +91,6 @@ class Line:
 
         self.line = self.clean(self.line, self.lem)
 
-        # words = [ s.strip().translate(None, Line.NOISE) \
         words = [ s.strip()
                   for s in self.line.split() ]
         lemtok = [ s.strip()
@@ -101,7 +102,7 @@ class Line:
 
         if self.valid:
 
-            comment = False
+            in_comment = False
 
             for i in range(len(words)):
                 word = words[i]
@@ -115,53 +116,106 @@ class Line:
 
                     break
 
-                # There is some additional transliteration noise in
-                # the form of bare colons.  I'm not sure what they
-                # mean, but they are consistently lemmatized as X,
-                # so they're not merely typos.  Let's remove them.
+                in_comment = self.add_word(word, tokens, in_comment)
 
-                if (':' == word):
-                    continue
+            # Now that all of the words have been added to the line,
+            # scan for damaged signs.
 
-                """
-                The lines of text may contain inline comments in the form
-                ($ ... $).  Oddly, the individual tokens in the inline
-                comments are lemmatized individually:
+            self.scan_for_damage()
 
-                ki ($ blank space $)-ta
-                ki[place]; X; X; X; X
 
-                so we don't want to use a regex to remove the comments;
-                rather, we'll just look for the inline comment delimiters
-                and use the to set a processing flag.  Any signs
-                interrupted by one of these inline comments (like the
-                remaining -ta above) become noise in the lemma and we'll
-                ignore them.
-                """
+    def add_word(self, word, tokens, in_comment):
 
-                if '($' in word:
-                    comment = True
+        # There is some additional transliteration noise in
+        # the form of bare colons.  I'm not sure what they
+        # mean, but they are consistently lemmatized as X,
+        # so they're not merely typos.  Let's remove them.
 
-                if '$)' in word:
-                    comment = False
-                    continue
+        if (':' == word):
+            return in_comment
 
-                if comment:
-                    continue
+        """
+        The lines of text may contain inline comments in the form
+        ($ ... $).  Oddly, the individual tokens in the inline
+        comments are lemmatized individually:
 
-                elements = [ ]
-                self.words.append( (word, elements) )
-                for element in tokens.split('|'):
+        ki ($ blank space $)-ta
+        ki[place]; X; X; X; X
 
-                    # Tag the word with the lemma token.
+        so we don't want to use a regex to remove the comments;
+        rather, we'll just look for the inline comment delimiters
+        and use the to set a processing flag.  Any signs
+        interrupted by one of these inline comments (like the
+        remaining -ta above) become noise in the lemma and we'll
+        ignore them.
+        """
 
-                    elements.append(element)
+        if '($' in word:
 
-                    # A ``u'' token generally indicates unlemmatizability
-                    # due to damage.
+            # Just started a comment.
 
-                    if 'u' == element:
-                        self.damaged = True
+            return True
+
+        if '$)' in word:
+
+            # Just finished a comment.
+
+            return False
+
+        if in_comment:
+
+            # Nothing to do.  Still in a comment.
+
+            return True
+
+        elements = [ ]
+        self.words.append( (word, elements) )
+
+        for element in tokens.split('|'):
+
+            # Tag the word with the lemma token.
+
+            elements.append(element)
+
+        # Not in a comment.
+
+        return False
+
+
+    def scan_for_damage(self):
+
+        self.damaged = False
+        self.damaged_and_tagged = False
+
+        for (word, lemtokens) in self.words:
+            if ('x' == word) or ('-x' in word) or ('x-' in word) \
+                             or ('}x' in word) or ('x{' in word):
+
+                # Set the damaged flag for this line.
+
+                self.damaged = True
+
+                # However, some damaged signs have been tagged by the
+                # transliterators, who felt confident in the strength of
+                # the context to say that the damaged sign wasn't
+                # unlemmatizable.  That lessens the effect of the damage
+                # from our perspective.
+
+                if 'u' not in lemtokens:
+
+                    # Ok, great; this word is damaged but not tagged as
+                    # 'u' (unlemmatizable due to damage).
+
+                    self.damaged_and_tagged = True
+
+                else:
+
+                    # Uh oh.  There's unrecoverable damage to the line.
+                    # That pretty much ruins this line for our purposes.
+                    # No point in continuing.
+
+                    self.damaged_and_tagged = False
+                    return
 
 
     def removeAdditions(self, line):

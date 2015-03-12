@@ -222,11 +222,13 @@ def process(line, args):
 
     """
     print
-    print 'valid: {}'.format(line.valid)
-    print 'dmg:   {}'.format(line.damaged)
-    print 'line:  {}'.format(line.line)
-    print 'lem:   {}'.format(line.lem)
-    print 'words: {}'.format(line.words)
+    print 'valid:   {}'.format(line.valid)
+    print 'dmg:     {}'.format(line.damaged)
+    print 'dmg_tag: {}'.format(line.damaged_and_tagged)
+    print 'line:    {}'.format(line.line)
+    print 'lem:     {}'.format(line.lem)
+    print 'words:   {}'.format(line.words)
+    return
     """
 
     if not line.lem:
@@ -239,8 +241,17 @@ def process(line, args):
         """
         return
 
+    # Record damage state as an attribute of the <l> tag.
+
+    damaged = "False"
+    if line.damaged:
+        if line.damaged_and_tagged:
+            damaged = "recoverable"
+        else:
+            damaged = "unrecoverable"
+
     if not args.bare:
-        stdout.write('<l>\n')
+        stdout.write('<l damaged="{}">\n'.format(damaged) )
 
     for (index, (word, _)) in enumerate(line.words):
         printWord(line, index, word, args)
