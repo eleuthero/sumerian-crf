@@ -8,9 +8,15 @@ To use, run `make all` at the command line.  The following files will be downloa
 
 - *cdli_atffull_lemma.atf*: The portion of the CDLI sources that have been lemmatized extracted into a single file.  This is an intermediate step for further processing, but you may find the interlinear lemmata to be useful for your own purposes.
 
-- *cdli_atffull_tagged.atf*: A file in which each word of each lemmatized tablet is rendered on its own line along with the part of speech with which it was tagged in the lemmata, delimited by tabs.  Lines on a tablet are delimited by the special tokens **&lt;l&gt;** to begin a line and **&lt;/l&gt;** to end it; tablets are delimited by blank spaces.
+- *cdli_atffull_tagged.atf*: A file in which each word of each lemmatized tablet is rendered on its own line along with the part of speech with which it was tagged in the lemmata, delimited by tabs.  Lines on a tablet are delimited by the special tokens **&lt;l&gt;** to begin a line and **&lt;/l&gt;** to end it; tablets are delimited by blank spaces.  Since this file can be quite sizable (in excess of 320MB at time of writing) and is only used to partition the full corpus into training and testing sets, it is deleted at the end of the `make` process, but you can update the Makefile to allow it to remain if you wish.
 
-- *cdli_atffull_crf_train.csv*, *cdli_atffull_crf_test1.csv*, and *cdli_atffull_crf_test2*: These are most likely to be the files of most immediate use.  They are a training and two testing corpora that extend the fields in *cdli_atffull_tagged.atf* by including many feature values as tab-delimited fields.  *cdli_atffull_crf_test1.csv* contains _no_ damaged lines; *cdli_atffull_crf_test2.csv* contains only damaged lines if all damaged words are lemmatizable.  See below for a full description of all features used by this script.  By default, the training set is 80% of the lemmatized Ur III corpus, and the testing set 20%.  Part of speech tags (from which the PN/non-PN tag for each word can be deduced) are left in the training corpus to allow you to gauge the F-measure of your algorithm.
+The features expressed in the training and testing corpora are presented as feature values delimited by tabs.  See below for a full description of all features used by this script.  By default, the training set is 80% of the lemmatized Ur III corpus, and the testing set 20%.  Part of speech tags (from which the PN/non-PN tag for each word can be deduced) are left in the training corpus to allow you to gauge the F-measure of your algorithm.
+
+- *cdli_atffull_crf_train.csv*: Contains the training set generated from the tagged corpus.  Since the training set must contain only high-confidence tags, any tablet lines that contain _any_ damaged words are removed from the training set.
+
+ *cdli_atffull_crf_test1.csv*: Contains one version of the testing corpus, containing no lines containing damaged words.
+
+ *cdli_atffull_crf_test2.csv*: The other version of the testing corpus, this file contains no lines containing unrecoverably damaged words.  The difference is that in the transliterations, most of the time, the translators tag any damaged word with the part of speech tag **u**, meaning that damage has rendered the word unlemmatizable.  However, in some cases where the contextual cues are strong, the translators are sufficiently confident to provide a part of speech tag even for damaged words.  Lines in this corpus may contain damaged words, but any such damaged words will have part of speech tags other than **u**.
 
 - *cdli_atffull_wordtagfreq.txt*: a sorted list of all words appearing in the corpus and the frequency with which the tags for these words appear.  Presented in JSON format.
 
@@ -22,7 +28,7 @@ Further things to note:
   - In cases where more than one lemma is associated with a word, only the most commonly attributed lemma for that word is included in the tag.  For instance, in some tablets, the word **{d}dumu-zi-[sze3]** is given as **DN|MN|FN**, meaning that the word can appear in any of those contexts.  When multiple lemmata are available for a single word, only the most frequently attested one will be used.
   - Common professions will be replaced with the synthetic tag **PF**, which does not occur in the lemmata.
 
-## Features in *cdli_atffull_tagged_crf.csv*
+## Features in training and testing corpora.
 
 Type      | Description
 --------- | -----------
