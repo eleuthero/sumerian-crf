@@ -118,12 +118,197 @@ class Context:
 
 
     @staticmethod
-    def get_liang_induced_context_rules():
-        return [ ]
+    def get_induced_context_rules():
+        return [ (['$PN$', 'dub-sar'], 10059),
+                 (['$PN$', 'lu2'], 3243),
+                 (['ba-hul', '$PN$'], 3172),
+                 (['sila4', '$PN$'], 2971),
+                 (['naga', '$PN$'], 2893),
+                 (['$PN$', 'sukkal'], 2631),
+                 (['$PN$', 'ba-zi'], 2514),
+                 (['$PN$', 'ugula'], 2296),
+                 (['$PN$', '|SZU+LAGAB|'], 2117),
+                 (['i3', '$PN$'], 2044),
+                 (['lugal', '$PN$'], 1986),
+                 (['$PN$', 'engar'], 1952),
+                 (['ab-ba-sa6-ga-ta', '$PN$'], 1892),
+                 (['u3', '$PN$'], 1681),
+                 (['$PN$', 'sza3'], 1595),
+                 (['udu', '$PN$'], 1531),
+                 (['$PN$', 'u3'], 1513),
+                 (['limmu2-ba', '$PN$'], 1473),
+                 (['ba-hun', '$PN$'], 1386),
+                 (['1', '$PN$'], 1356),
+                 (['igi', '$PN$'], 1343),
+                 (['$PN$', 'szabra'], 1328),
+                 (['gu4', '$PN$'], 1268),
+                 (['masz2', '$PN$'], 1267),
+                 (['$PN$', '1'], 1002),
+                 (['niga', '$PN$'], 949),
+                 (['ba-du3', '$PN$'], 920),
+                 (['e2', '$PN$'], 881),
+                 (['$PN$', 'dumu-ni'], 879),
+                 (['$PN$', 'igi'], 861),
+                 (['$PN$', 'e2'], 828),
+                 (['ba-ab-du8', '$PN$'], 815),
+                 (['$PN$', 'sagi'], 807),
+                 (['tug2', '$PN$'], 805),
+                 (['id-gur2', '$PN$'], 772),
+                 (['$PN$', 'a-sza3'], 756),
+                 (['$PN$', 'ur-nigar{gar}'], 720),
+                 (['$PN$', '{d}szul-gi-iri-mu'], 700),
+                 (['$PN$', 'aga3-us2'], 619),
+                 (['$PN$', 'dumu-ni-me'], 575),
+                 (['sum', '$PN$'], 567),
+                 (['lu2', '$PN$'], 554),
+                 (['$PN$', 'in-ta-e3-a'], 535),
+                 (['i3-gesz', '$PN$'], 534),
+                 (['usz2', '$PN$'], 518),
+                 (['a-ru-a', '$PN$'], 509),
+                 (['dam', '$PN$'], 495),
+                 (['$PN$', 'muhaldim'], 487),
+                 (['szum2', '$PN$'], 472),
+                 (['$PN$', 'szesz'], 463),
+                 (['ugu2', '$PN$'], 452),
+                 (['$PN$', 'a-hu-wa-qar'], 440),
+                 (['ma2', '$PN$'], 417),
+                 (['mu-du3', '$PN$'], 398),
+                 (['kaskal-sze3', '$PN$'], 396),
+                 (['$PN$', 'usz2'], 384),
+                 (['ARAD2-ta', '$PN$'], 374),
+                 (['lu2-dingir-ra-ta', '$PN$'], 372),
+                 (['$PN$', 'a-ru-a'], 368),
+                 (['$PN$', 'ARAD2'], 367),
+                 (['$PN$', 'u3-na-a-du11'], 362),
+                 (['ak', '$PN$'], 358),
+                 (['$PN$', 'na-lu5'], 357),
+                 (['$PN$', 'mar-tu'], 353),
+                 (['zi3', '$PN$'], 353),
+                 (['$PN$', 'ba-hun'], 341),
+                 (['$PN$', 'ba-a-gar'], 327),
+                 (['gal', '$PN$'], 326),
+                 (['su-ga', '$PN$'], 326),
+                 (['$PN$', 'ra2-gaba'], 321),
+                 (['i3-dub', '$PN$'], 320),
+                 (['$PN$', 'lu2-dingir-ra'], 319),
+                 (['gurusz', '$PN$'], 312),
+                 (['na-lu5-ta', '$PN$'], 311),
+                 (['ba-dim2', '$PN$'], 303),
+                 (['$PN$', 'la2-ia3'], 295),
+                 (['$PN$', 'lugal'], 285),
+                 (['{gesz}kiri6', '$PN$'], 279),
+                 (['$PN$', 'du11-ga'], 273),
+                 (['i3-pa3', '$PN$'], 271),
+                 (['mu-hul', '$PN$'], 270),
+                 (['ur-{d}szara2', '$PN$'], 261),
+                 (['du', '$PN$'], 257),
+                 (['la2-ia3', '$PN$'], 254),
+                 (['$PN$', 'n'], 250),
+                 (['dub', '$PN$'], 250),
+                 (['gesz', '$PN$'], 246),
+                 (['hi-a', '$PN$'], 245),
+                 (['$PN$', 'dam'], 242),
+                 (['$PN$', 'sza13-dub-ba-ka'], 241),
+                 (['sa2-du11', '$PN$'], 235),
+                 (['kasz', '$PN$'], 234),
+                 (['ku3-babbar', '$PN$'], 233),
+                 (['sza3', '$PN$'], 230),
+                 (['$PN$', 'ma2'], 228),
+                 (['us2-sa', '$PN$'], 225),
+                 (['SIG7-a', '$PN$'], 224),
+                 (['$PN$', 'ur-{d}ba-ba6'], 223),
+                 (['$PN$', 'gaba-ri'], 221),
+                 (['masz-da3', '$PN$'], 219),
+                 (['dabin', '$PN$'], 218),
+                 (['sze-ba', '$PN$'], 218),
+                 (['nu', '$PN$'], 215),
+                 (['ga', '$PN$'], 209),
+                 (['siki', '$PN$'], 209),
+                 (['$PN$', 'ur-ku3-nun-na'], 198),
+                 (['a2', '$PN$'], 196),
+                 (['$PN$', 'ba-du3'], 194),
+                 (['$PN$', 'su-su-dam'], 191),
+                 (['geme2', '$PN$'], 185),
+                 (['$PN$', 'geme2'], 184),
+                 (['nita2', '$PN$'], 184),
+                 (['$PN$', 'ugu2'], 183),
+                 (['bala', '$PN$'], 182),
+                 (['$PN$', 'gurum2'], 179),
+                 (['$PN$', 'erin2'], 177),
+                 (['us2', '$PN$'], 176),
+                 (['$PN$', 'lu2-inim-ma-bi-me'], 174),
+                 (['gub-ba-am3', '$PN$'], 170),
+                 (['u2', '$PN$'], 170),
+                 (['{d}iszkur-illat-ta', '$PN$'], 168),
+                 (['{d}szu-{d}suen', '$PN$'], 166),
+                 (['sag10', '$PN$'], 166),
+                 (['sze-bi', '$PN$'], 165),
+                 (['$PN$', 'szar2-ra-ab-du'], 164),
+                 (['$PN$', 'gen-na'], 157),
+                 (['$PN$', 'im-e'], 154),
+                 (['$PN$', 'tug2'], 154),
+                 (['munus', '$PN$'], 153),
+                 (['$PN$', 'zah3'], 151),
+                 (['$PN$', 'sag10'], 145),
+                 (['aga3-us2-e-ne-sze3', '$PN$'], 143),
+                 (['na-sa6-ta', '$PN$'], 142),
+                 (['sig4', '$PN$'], 142),
+                 (['$PN$', 'sza3-gal'], 141),
+                 (['$PN$', 'a2'], 139),
+                 (['$PN$', 'nu'], 139),
+                 (['$PN$', 'sza3-tam'], 138),
+                 (['$PN$', 'ur-mes'], 138),
+                 (['uz-ga', '$PN$'], 138),
+                 (['ur-gu2-edin-na-ta', '$PN$'], 137),
+                 (['$PN$', 'sze-bi'], 136),
+                 (['erin2', '$PN$'], 136),
+                 (['ku6', '$PN$'], 136),
+                 (['$PN$', 'a-ra2'], 134),
+                 (['bad3', '$PN$'], 134),
+                 (['zah3', '$PN$'], 134),
+                 (['$PN$', 'lu2-{d}nin-szubur'], 133),
+                 (['$PN$', 'zabar-dab5'], 133),
+                 (['$PN$', 'a-kal-la'], 132),
+                 (['$PN$', 'i3-dub'], 132),
+                 (['$PN$', 'iti-ta'], 132),
+                 (['$PN$', 'a-hu-we-er'], 126),
+                 (['$PN$', 'in-la2'], 126),
+                 (['$PN$', 'SIG7-a'], 126),
+                 (['in-ta-e3-a-ta', '$PN$'], 126),
+                 (['ug3', '$PN$'], 126),
+                 (['ansze', '$PN$'], 125),
+                 (['us2-sa-bi', '$PN$'], 125),
+                 (['2', '$PN$'], 124),
+                 (['$PN$', 'szu-i'], 122),
+                 (['$PN$', 'udu'], 121),
+                 (['inim', '$PN$'], 121),
+                 (['ku3', '$PN$'], 121),
+                 (['$PN$', 'i3-gal2'], 120),
+                 (['a2-gam', '$PN$'], 120),
+                 (['$PN$', 'ARAD2-mu'], 119),
+                 (['$PN$', 'lu2-kal-la'], 117),
+                 (['$PN$', 'lu2-{gesz}tukul'], 116),
+                 (['us2-sa-a-bi', '$PN$'], 115),
+                 (['$PN$', 'gu4'], 114),
+                 (['$PN$', 'sze-ba'], 113),
+                 (['$PN$', 'szesz-kal-la'], 113),
+                 (['su-su', '$PN$'], 112),
+                 (['a-hu-ni-ta', '$PN$'], 109),
+                 (['en-dingir-mu-ta', '$PN$'], 109),
+                 (['uri5{ki}-ma', '$PN$'], 109),
+                 (['$PN$', 'ad-kup4'], 107),
+                 (['$PN$', 'sa2-du11'], 104),
+                 (['$PN$', 'ur-{d}ig-alim'], 104),
+                 (['$PN$', 'ur-{d}lamma'], 104),
+                 (['$PN$', 'he2-na-ab-sum-mu'], 103),
+                 (['$PN$', 'ak'], 102),
+                 (['ur-{d}szul-pa-e3-ta', '$PN$'], 102),
+                 (['ba-zi-ta', '$PN$'], 101),
+                 (['$PN$', 'u2-ta2-mi-szar-ra-am'], 100) ]
 
 
     @staticmethod
-    def get_liang_induced_spelling_rules():
+    def get_induced_spelling_rules():
         return [ ('ir', 46386),
                  ('lu2', 41752),
                  ('a-a', 39855),
@@ -814,10 +999,15 @@ class Context:
                       '\titi at head of sentence'
                       '\tmu at head of sentence' )
 
-        for (token, frequency) in Context.get_liang_induced_context_rules():
-            stdout.write( '\tContext {} ({})'.format(token, frequency) )
+        for (token_pair, frequency) in Context.get_induced_context_rules():
+            if '$' in token_pair[0]:
+                stdout.write( '\tRight-context is {} ({})'
+                    .format(token_pair[1], frequency) )
+            else:
+                stdout.write( '\tLeft-context is {} ({})'
+                    .format(token_pair[0], frequency) )
 
-        for (token, frequency) in Context.get_liang_induced_spelling_rules():
+        for (token, frequency) in Context.get_induced_spelling_rules():
             stdout.write( '\tContains {} ({})'.format(token, frequency) )
 
         stdout.write('\n')
@@ -1066,9 +1256,38 @@ class Context:
 
         Context.test_all([ 'mu' == line.words[0][0] ])
 
-        # Liang Luo's induced spelling rules
+        # Liang Luo's induced contextual rules from his
+        # co-training research.
 
-        for (token, frequency) in Context.get_liang_induced_spelling_rules():
+        for (token_pair, frequency) in Context.get_induced_context_rules():
+
+            # We have to be a little careful; we can't purport to know what
+            # the part of speech of the previous/next word is, so that can't
+            # be part of the logic.  Instead, we'll just see which word is
+            # tagged as the POS and check the context based on that.
+
+            if '$' in token_pair[0]:
+
+                # Word is to right of POS.  It could be that our left context
+                # is the POS and we're the word, or it could be that we're
+                # the POS and our right-context is the word.  However, since
+                # we're iterating through each word in the corpus, we need
+                # only to check one case; the next iteration will check
+                # the other case.  We'll assume we're the POS.
+
+                Context.test_all([ rightcx == token_pair[1] ])
+
+            else:
+
+                # Same deal, except the word is to the left of the POS, which
+                # we assume to be us.
+
+                Context.test_all([ leftcx == token_pair[0] ])
+
+        # Liang Luo's induced spelling rules from his
+        # co-training research.
+
+        for (token, frequency) in Context.get_induced_spelling_rules():
             Context.test_all([ token in word ])
 
         """

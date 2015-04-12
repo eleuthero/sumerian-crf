@@ -69,6 +69,8 @@ boolean   | 1 if word followed by **zarin**, a (low-) quality modifier usually a
 boolean   | 1 if word followed by a numeric classifier.  A numeric classifier combines both a quantity (with a different symbol for each base in the Sumerian number system) and a specific type of object (dry measure, liquids, precious metals, land).
 boolean   | 1 if line context begins with **iti** "*month*".  Lines of this type strongly correlate with information on the month on which a transaction occurred.
 boolean   | 1 if line context begins with **mu** "*year*".  Lines of this type correlate much more weakly with information on the year on which a transaction occurred.
+186 booleans  | Contextual features induced by Liang Luo's research on the this corpus using co-training.  There are 186 induced rules that occurred at least 100 times in the corpus, and there is one feature for each such rule.
+646 booleans  | Spelling features induced by Liang Luo's research on the this corpus using co-training.  There are 646 spelling rules that occurred at least 100 times in the corpus, and there is one feature for each such rule.
 word      | Correct lemma tag.  Use this in training, and use to evaluate the performance of your algorithm in testing.
 
 ## Lemmata tags
