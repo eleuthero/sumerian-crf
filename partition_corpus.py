@@ -50,11 +50,26 @@ def init_parser():
 
     return parser.parse_args()
 
-def get_tablets(lines):
+def get_next_tablet(fin):
+    tablet = None
 
-    tablet = [ ]
+    while True:
+        line = fin.readline()
 
-    for line in lines:
+        if not line:
+
+            # Shouldn't happen; the file should end nicely with a
+            # newline tablet separator.  However, if it doesn't,
+            # fall through and treat it as one.
+
+            break
+
+        else:
+
+            # We've got a line; make sure tablet is a list.
+
+            if not tablet:
+                tablet = [ ]
 
         if '\n' == line:
 
@@ -62,11 +77,7 @@ def get_tablets(lines):
             # Include an additional blank line to delimit future tablets.
 
             tablet.append( ('\n', DMG_NONE) )
-            yield tablet
-
-            # Reset tablet.
-
-            tablet = [ ]
+            return tablet
 
         elif line.startswith('<l'):
 
@@ -82,7 +93,11 @@ def get_tablets(lines):
             # Accumulate this line, removing the damage
             # attribute.
 
-            # tablet.append( (line, damage_state) )     # (debugging)
+            """
+            tablet.append( ( '<l {}>\n'.format(damage_state),
+                             damage_state) )
+            """
+
             tablet.append( ('<l>\n', damage_state) )
 
         else:
@@ -91,26 +106,24 @@ def get_tablets(lines):
 
     # If there are lines left over (shouldn't happen) ...
 
-    if len(tablet) > 0:
+    if tablet and len(tablet) > 0:
         tablet.append( ('\n', DMG_NONE) )
-        yield tablet
+
+    return tablet
 
 
 def partition(args):
-
-    lines = [ ]
-    for line in fileinput.input('-'):
-        lines.append(line)
-
-    ftrain = open(args.train, 'w')
 
     # Write all lines up to and including the first blank line in the
     # corpus to the training corpus; it contains the header.
     # Save the rest of the lines away.  We'll be iterating over them soon.
 
+    fin = fileinput.input('-')
+    ftrain = open(args.train, 'w')
+
     loop = True
     while loop:
-        line = lines.pop(0)
+        line = fin.readline()
         ftrain.write(line)
         if '\n' == line:
             loop = False
@@ -134,8 +147,9 @@ def partition(args):
 
     count = trainmax
     fouts = [ ftrain ]
+    tablet = get_next_tablet(fin)
 
-    for tablet in get_tablets(lines):
+    while tablet:
         for fout in fouts:
             for (line, damage_state) in tablet:
 
@@ -177,10 +191,14 @@ def partition(args):
                 (fouts, count) = ( [ ftrain ],
                                    trainmax )
 
+        # Get next tablet.
+
+        tablet = get_next_tablet(fin)
 
     ftrain.close()
     ftest_r.close()
     ftest_p.close()
+    fin.close()
 
 
 # ====
