@@ -222,12 +222,12 @@ def process(line, args):
 
     """
     print
-    print 'valid:   {}'.format(line.valid)
-    print 'dmg:     {}'.format(line.damaged)
-    print 'dmg_tag: {}'.format(line.damaged_and_tagged)
-    print 'line:    {}'.format(line.line)
-    print 'lem:     {}'.format(line.lem)
-    print 'words:   {}'.format(line.words)
+    print 'valid:   [{}]'.format(line.valid)
+    print 'dmg:     [{}]'.format(line.damaged)
+    print 'dmg_tag: [{}]'.format(line.damaged_and_tagged)
+    print 'line:    [{}]'.format(line.line)
+    print 'lem:     [{}]'.format(line.lem)
+    print 'words:   [{}]'.format(line.words)
     return
     """
 
@@ -278,10 +278,18 @@ def parse(args):
         if line1[0] not in '&#$@':
             if line2.startswith('#lem:'):
                 lines.append( Line(line1, line2) )
-            """
             else:
-                lines.append( Line(line1, None) )
-            """
+
+                # This tablet is not lemmatized.  Create a fake
+                # lemma by replacing each word in line1 with an
+                # X tag.  Skip the first word in line1, which is
+                # the line number.
+
+                fakelem = '#lem: ' + ' '.join( [ 'X;'
+                                                 for word
+                                                 in line1.split(' ')[1:]
+                                               ] )[:-1]
+                lines.append( Line(line1, fakelem) )
 
         # Are we at the end of a tablet ?
 

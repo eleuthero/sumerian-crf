@@ -54,7 +54,7 @@ class Line:
             # The first five characters of a lemma line are "#lem:";
             # ignore these.
 
-            self.lem = lem[5:]
+            self.lem = lem[5:].strip()
 
         self.words = [ ]
         self.parse()

@@ -12,8 +12,9 @@ CORPUS_FILE_URL= http://www.cdli.ucla.edu/tools/cdlifiles/$(CORPUS_FILE_ZIP)
 CORPUS_FILE=./cdli_atffull.atf
 
 CORPUS_LEMMA_FILE=./cdli_atffull_lemma.atf
+CORPUS_LEMMA_TAGGED_FILE=./cdli_atffull_lemma_tagged.atf
 CORPUS_NOLEMMA_FILE=./cdli_atffull_nolemma.atf
-CORPUS_TAGGED_FILE=./cdli_atffull_tagged.atf
+CORPUS_NOLEMMA_TAGGED_FILE=./cdli_atffull_nolemma_tagged.atf
 CORPUS_TAGGED_CRF_FILE=./cdli_atffull_tagged_crf.csv
 CORPUS_TAGGED_CRF_TRAIN_FILE=./cdli_atffull_train_crf.csv
 CORPUS_TAGGED_CRF_TEST1_FILE=./cdli_atffull_test1_crf.csv
@@ -31,7 +32,8 @@ all: corpus tagfreq tagcrf $(CORPUS_WORDTAGFREQ_FILE)
 # ===============
 
 corpus:	\
-    $(CORPUS_TAGGED_FILE)
+    $(CORPUS_LEMMA_TAGGED_FILE) \
+    $(CORPUS_NOLEMMA_TAGGED_FILE)
 
 # Fetch compressed CDLI Ur III corpus from source.
 # ================================================
@@ -62,12 +64,22 @@ $(CORPUS_LEMMA_FILE) $(CORPUS_NOLEMMA_FILE): \
 
 # From the lemmatized corpus, generate a tagged corpus.
 
-$(CORPUS_TAGGED_FILE): $(CORPUS_LEMMA_FILE)
+$(CORPUS_LEMMA_TAGGED_FILE): $(CORPUS_LEMMA_FILE)
 
 	cat $(CORPUS_LEMMA_FILE) \
 		| python ./tag_corpus.py \
 			--nogloss --bestlemma --pf \
-		> $(CORPUS_TAGGED_FILE)
+		> $(CORPUS_LEMMA_TAGGED_FILE)
+
+# From the unlemmatized corpus, generate a tagged corpus.
+
+$(CORPUS_NOLEMMA_TAGGED_FILE): $(CORPUS_NOLEMMA_FILE)
+
+	cat $(CORPUS_NOLEMMA_FILE) \
+		| python ./tag_corpus.py \
+		> $(CORPUS_NOLEMMA_TAGGED_FILE)
+
+# From the lemma file, generate a list of tagged words.
 
 $(CORPUS_WORDTAGFREQ_FILE): $(CORPUS_LEMMA_FILE)
 
@@ -411,8 +423,9 @@ $(CORPUS_POSFREQUENCY_DIR)/determinatives.txt: \
 
 clean:
 	rm -f $(CORPUS_LEMMA_FILE)
+	rm -f $(CORPUS_LEMMA_TAGGED_FILE)
 	rm -f $(CORPUS_NOLEMMA_FILE)
-	rm -f $(CORPUS_TAGGED_FILE)
+	rm -f $(CORPUS_NOLEMMA_TAGGED_FILE)
 	rm -f $(CORPUS_TAGGED_CRF_FILE)
 	rm -f $(CORPUS_TAGGED_CRF_TRAIN_FILE)
 	rm -f $(CORPUS_TAGGED_CRF_TEST1_FILE)
