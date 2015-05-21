@@ -13,20 +13,24 @@ CORPUS_FILE=./cdli_atffull.atf
 
 CORPUS_LEMMA_FILE=./cdli_atffull_lemma.atf
 CORPUS_LEMMA_TAGGED_FILE=./cdli_atffull_lemma_tagged.atf
-CORPUS_NOLEMMA_FILE=./cdli_atffull_nolemma.atf
-CORPUS_NOLEMMA_TAGGED_FILE=./cdli_atffull_nolemma_tagged.atf
 CORPUS_LEMMA_CRF_FILE=./cdli_atffull_lemma_crf.csv
+CORPUS_TRAINING_PERCENT=80
 CORPUS_LEMMA_CRF_TRAIN_FILE=./cdli_atffull_train_crf.csv
 CORPUS_LEMMA_CRF_TEST1_FILE=./cdli_atffull_lemma_test1_crf.csv
 CORPUS_LEMMA_CRF_TEST2_FILE=./cdli_atffull_lemma_test2_crf.csv
+
+CORPUS_NOLEMMA_FILE=./cdli_atffull_nolemma.atf
+CORPUS_NOLEMMA_TAGGED_FILE=./cdli_atffull_nolemma_tagged.atf
 CORPUS_NOLEMMA_CRF_FILE=./cdli_atffull_nolemma_crf.csv
 CORPUS_NOLEMMA_CRF_TEST1_FILE=./cdli_atffull_nolemma_test1_crf.csv
 CORPUS_NOLEMMA_CRF_TEST2_FILE=./cdli_atffull_nolemma_test2_crf.csv
-CORPUS_TRAINING_PERCENT=80
+SEGMENTATION_TABLET_COUNT=10
+SEGMENTATION_PERMITDAMAGE_DIRNAME=./segment_permit_damage
+SEGMENTATION_REMOVEDAMAGE_DIRNAME=./segment_remove_damage
+
 CORPUS_WORDTAGFREQ_FILE=./cdli_atffull_wordtagfreq.txt
 CORPUS_POSFREQUENCY_DIR=./pos_frequency
 CORPUS_BARETAGGED_FILE=$(CORPUS_POSFREQUENCY_DIR)/cdli_atffull_bare.atf
-
 
 # all: corpus tagfreq tagcrf baseline $(CORPUS_WORDTAGFREQ_FILE)
 all: corpus tagfreq tagcrf $(CORPUS_WORDTAGFREQ_FILE)
@@ -127,6 +131,18 @@ $(CORPUS_NOLEMMA_CRF_TEST2_FILE): \
 			--test-remove-damage $(CORPUS_NOLEMMA_CRF_TEST1_FILE) \
 			--test-permit-damage $(CORPUS_NOLEMMA_CRF_TEST2_FILE) \
 			--percent 0
+
+	mkdir $(SEGMENTATION_REMOVEDAMAGE_DIRNAME)
+	cat $(CORPUS_NOLEMMA_CRF_TEST1_FILE) \
+		| python ./segment.py \
+			--count $(SEGMENTATION_TABLET_COUNT) \
+			--directory $(SEGMENTATION_REMOVEDAMAGE_DIRNAME)
+
+	mkdir $(SEGMENTATION_PERMITDAMAGE_DIRNAME)
+	cat $(CORPUS_NOLEMMA_CRF_TEST2_FILE) \
+		| python ./segment.py \
+			--count $(SEGMENTATION_TABLET_COUNT) \
+			--directory $(SEGMENTATION_PERMITDAMAGE_DIRNAME)
 
 	# Done with this file; we just needed to split it up into a
 	# training and a testing corpus.  Can remove it now, especially
@@ -474,3 +490,5 @@ clean:
 	rm -f $(CORPUS_WORDTAGFREQ_FILE)
 	rm -f $(CORPUS_BARETAGGED_FILE)
 	rm -rf $(CORPUS_POSFREQUENCY_DIR)
+	rm -rf $(SEGMENTATION_PERMITDAMAGE_DIRNAME)
+	rm -rf $(SEGMENTATION_REMOVEDAMAGE_DIRNAME)
