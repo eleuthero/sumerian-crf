@@ -3,7 +3,6 @@
 import fileinput
 import argparse
 import random
-from sys import stdout
 from itertools import tee, izip
 
 from tablet import *
@@ -22,6 +21,14 @@ def init_parser():
                         help='Remove any lemmata in generated corpus.',
                         action='store_true')
 
+    parser.add_argument('-l', '--lemmatizedfile', 
+                        help='Name of output file for lemmatized tablets',
+                        required=True)
+
+    parser.add_argument('-u', '--unlemmatizedfile', 
+                        help='Name of output file for unlemmatized tablets',
+                        required=True)
+
     return parser.parse_args()
 
 # Funny pattern for iterating via a pair of elements.
@@ -38,12 +45,15 @@ def parse(args):
     lemma = False
     valid = False 
 
+    # Pass '-' to input() to make sure fileinput doesn't interpret
+    # our command-line switches as filenames.
+
     lines = list()
     for line in fileinput.input('-'):
         lines.append(line)
 
-    # Pass '-' to input() to make sure fileinput doesn't interpret
-    # our command-line switches as filenames.
+    flemma = open(args.lemmatizedfile, 'w')
+    fnolemma = open(args.unlemmatizedfile, 'w')
 
     for line1, line2 in pairwise(lines):
         line1 = line1.strip()
@@ -66,13 +76,19 @@ def parse(args):
                 lines.append(line1)
 
         if line2.startswith('&'):
-            if lemma:
-                if valid:
-                    for line in lines:
-                        stdout.write(line + '\n')
+            if valid:
+                for line in lines:
+                    if lemma:
+                        flemma.write(line + '\n')
+                    else:
+                        fnolemma.write(line + '\n')
+     
             lemma = False
             valid = False 
             lines = [ ]
+
+    flemma.close()
+    fnolemma.close()
 
 # ====
 # Main

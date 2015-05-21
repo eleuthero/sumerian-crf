@@ -275,8 +275,13 @@ def parse(args):
         # Accumulate a line if the line isn't a comment and is
         # followed by a lemma.
 
-        if line1[0] not in '&#$@' and line2.startswith('#lem:'):
-            lines.append( Line(line1, line2) )
+        if line1[0] not in '&#$@':
+            if line2.startswith('#lem:'):
+                lines.append( Line(line1, line2) )
+            """
+            else:
+                lines.append( Line(line1, None) )
+            """
 
         # Are we at the end of a tablet ?
 
@@ -291,6 +296,14 @@ def parse(args):
             # Restart accumulated lines.
 
             lines = [ ]
+
+    # Finish any incomplete trailing tablet (shouldn't happen)
+
+    if len(lines) > 0:
+
+        stdout.write('\n')
+        for line in lines:
+            process(line, args)
 
 # ====
 # Main

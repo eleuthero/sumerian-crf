@@ -11,8 +11,8 @@ CORPUS_FILE_ZIP=./cdli_atffull.zip
 CORPUS_FILE_URL= http://www.cdli.ucla.edu/tools/cdlifiles/$(CORPUS_FILE_ZIP)
 CORPUS_FILE=./cdli_atffull.atf
 
-
 CORPUS_LEMMA_FILE=./cdli_atffull_lemma.atf
+CORPUS_NOLEMMA_FILE=./cdli_atffull_nolemma.atf
 CORPUS_TAGGED_FILE=./cdli_atffull_tagged.atf
 CORPUS_TAGGED_CRF_FILE=./cdli_atffull_tagged_crf.csv
 CORPUS_TAGGED_CRF_TRAIN_FILE=./cdli_atffull_train_crf.csv
@@ -49,14 +49,16 @@ $(CORPUS_FILE): $(CORPUS_FILE_ZIP)
 		$(UNZIP) $(CORPUS_FILE_ZIP); \
 	fi
 
-# Filter corpus to generate lemmatized portion.
+# Partition corpus into lemmatized and unlemmatized files.
 
-$(CORPUS_LEMMA_FILE): $(CORPUS_FILE)
+$(CORPUS_LEMMA_FILE) $(CORPUS_NOLEMMA_FILE): \
+    $(CORPUS_FILE)
 
 	cat $(CORPUS_FILE) \
 		| python ./generate_corpus.py \
 			--lang sux \
-		> $(CORPUS_LEMMA_FILE)
+            --lemmatizedfile $(CORPUS_LEMMA_FILE) \
+            --unlemmatizedfile $(CORPUS_NOLEMMA_FILE)
 
 # From the lemmatized corpus, generate a tagged corpus.
 
@@ -409,6 +411,7 @@ $(CORPUS_POSFREQUENCY_DIR)/determinatives.txt: \
 
 clean:
 	rm -f $(CORPUS_LEMMA_FILE)
+	rm -f $(CORPUS_NOLEMMA_FILE)
 	rm -f $(CORPUS_TAGGED_FILE)
 	rm -f $(CORPUS_TAGGED_CRF_FILE)
 	rm -f $(CORPUS_TAGGED_CRF_TRAIN_FILE)
