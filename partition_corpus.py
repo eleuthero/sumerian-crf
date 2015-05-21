@@ -146,7 +146,16 @@ def partition(args):
     (trainmax, testmax) = ( args.percent / g, (100 - args.percent) / g )
 
     count = trainmax
-    fouts = [ ftrain ]
+
+    # If any tablets are going to be written to the training set
+    # (args.percent > 0) then start our writes to the training set
+    # file handles; otherwise, start with the testing set file handles.
+
+    if trainmax > 0:
+        fouts = [ ftrain ]
+    else:
+        fouts = [ ftest_r, ftest_p ]
+
     tablet = get_next_tablet(fin)
 
     while tablet:

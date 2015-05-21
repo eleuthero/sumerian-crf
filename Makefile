@@ -17,9 +17,11 @@ CORPUS_NOLEMMA_FILE=./cdli_atffull_nolemma.atf
 CORPUS_NOLEMMA_TAGGED_FILE=./cdli_atffull_nolemma_tagged.atf
 CORPUS_LEMMA_CRF_FILE=./cdli_atffull_lemma_crf.csv
 CORPUS_LEMMA_CRF_TRAIN_FILE=./cdli_atffull_train_crf.csv
-CORPUS_LEMMA_CRF_TEST1_FILE=./cdli_atffull_test1_crf.csv
-CORPUS_LEMMA_CRF_TEST2_FILE=./cdli_atffull_test2_crf.csv
+CORPUS_LEMMA_CRF_TEST1_FILE=./cdli_atffull_lemma_test1_crf.csv
+CORPUS_LEMMA_CRF_TEST2_FILE=./cdli_atffull_lemma_test2_crf.csv
 CORPUS_NOLEMMA_CRF_FILE=./cdli_atffull_nolemma_crf.csv
+CORPUS_NOLEMMA_CRF_TEST1_FILE=./cdli_atffull_nolemma_test1_crf.csv
+CORPUS_NOLEMMA_CRF_TEST2_FILE=./cdli_atffull_nolemma_test2_crf.csv
 CORPUS_TRAINING_PERCENT=80
 CORPUS_WORDTAGFREQ_FILE=./cdli_atffull_wordtagfreq.txt
 CORPUS_POSFREQUENCY_DIR=./pos_frequency
@@ -94,7 +96,8 @@ tagcrf: \
 	$(CORPUS_LEMMA_CRF_TRAIN_FILE) \
 	$(CORPUS_LEMMA_CRF_TEST1_FILE) \
 	$(CORPUS_LEMMA_CRF_TEST2_FILE) \
-	$(CORPUS_NOLEMMA_CRF_FILE)
+	$(CORPUS_NOLEMMA_CRF_TEST1_FILE) \
+	$(CORPUS_NOLEMMA_CRF_TEST2_FILE)
 
 $(CORPUS_LEMMA_CRF_TRAIN_FILE) \
 $(CORPUS_LEMMA_CRF_TEST1_FILE) \
@@ -113,6 +116,23 @@ $(CORPUS_LEMMA_CRF_TEST2_FILE): \
 	# since it's quite a sizable file.
 
 	# rm -f $(CORPUS_LEMMA_CRF_FILE)
+
+$(CORPUS_NOLEMMA_CRF_TEST1_FILE) \
+$(CORPUS_NOLEMMA_CRF_TEST2_FILE): \
+	$(CORPUS_NOLEMMA_CRF_FILE)
+
+	cat $(CORPUS_NOLEMMA_CRF_FILE) \
+		| python ./partition_corpus.py \
+			--train /dev/null \
+			--test-remove-damage $(CORPUS_NOLEMMA_CRF_TEST1_FILE) \
+			--test-permit-damage $(CORPUS_NOLEMMA_CRF_TEST2_FILE) \
+			--percent 0
+
+	# Done with this file; we just needed to split it up into a
+	# training and a testing corpus.  Can remove it now, especially
+	# since it's quite a sizable file.
+
+	# rm -f $(CORPUS_NOLEMMA_CRF_FILE)
 
 $(CORPUS_LEMMA_CRF_FILE): $(CORPUS_LEMMA_FILE)
 
@@ -449,6 +469,8 @@ clean:
 	rm -f $(CORPUS_LEMMA_CRF_TEST1_FILE)
 	rm -f $(CORPUS_LEMMA_CRF_TEST2_FILE)
 	rm -f $(CORPUS_NOLEMMA_CRF_FILE)
+	rm -f $(CORPUS_NOLEMMA_CRF_TEST1_FILE)
+	rm -f $(CORPUS_NOLEMMA_CRF_TEST2_FILE)
 	rm -f $(CORPUS_WORDTAGFREQ_FILE)
 	rm -f $(CORPUS_BARETAGGED_FILE)
 	rm -rf $(CORPUS_POSFREQUENCY_DIR)
