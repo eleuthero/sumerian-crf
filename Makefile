@@ -119,7 +119,7 @@ $(CORPUS_LEMMA_CRF_TEST2_FILE): \
 	# training and a testing corpus.  Can remove it now, especially
 	# since it's quite a sizable file.
 
-	# rm -f $(CORPUS_LEMMA_CRF_FILE)
+	rm -f $(CORPUS_LEMMA_CRF_FILE)
 
 $(CORPUS_NOLEMMA_CRF_TEST1_FILE) \
 $(CORPUS_NOLEMMA_CRF_TEST2_FILE): \
@@ -144,11 +144,10 @@ $(CORPUS_NOLEMMA_CRF_TEST2_FILE): \
 			--count $(SEGMENTATION_TABLET_COUNT) \
 			--directory $(SEGMENTATION_PERMITDAMAGE_DIRNAME)
 
-	# Done with this file; we just needed to split it up into a
-	# training and a testing corpus.  Can remove it now, especially
-	# since it's quite a sizable file.
+	# Done with this file; we just needed to split it up into chunks.
+	# Can remove it now, especially since it's quite a sizable file.
 
-	# rm -f $(CORPUS_NOLEMMA_CRF_FILE)
+	rm -f $(CORPUS_NOLEMMA_CRF_FILE)
 
 $(CORPUS_LEMMA_CRF_FILE): $(CORPUS_LEMMA_FILE)
 
