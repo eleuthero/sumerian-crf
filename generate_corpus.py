@@ -81,7 +81,8 @@ def parse(args):
                     if lemma:
                         flemma.write(line + '\n')
                     else:
-                        fnolemma.write(line + '\n')
+                        if line:
+                            fnolemma.write(line + '\n')
      
             lemma = False
             valid = False 

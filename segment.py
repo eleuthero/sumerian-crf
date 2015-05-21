@@ -11,6 +11,7 @@ def init_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--count',
+                        type = int,
                         default = 10,  
                         help='Number of tablets to include in a single '
                              'file created during the segmentation '
@@ -65,21 +66,24 @@ def get_next_tablet(fin):
     return tablet
 
 
-def write_human_file(index, tablet):
+def write_human_file(tablets, index):
 
     filename = path.join( args.directory,
                           'human_{}.txt'.format(index) ) 
 
     with open(filename, 'w') as fout:
-        for line in tablet:
-            if '\t' in line:
-                fout.write( line.split('\t')[0] )
-                fout.write(' ')
-            elif '</l>' in line:
-                fout.write('\n')
+        for tablet in tablets:
+            for line in tablet:
+                if '\t' in line:
+                    fout.write( line.split('\t')[0] )
+                    fout.write(' ')
+                elif '</l>' in line:
+                    fout.write('\n')
+                elif '\n' == line:
+                    fout.write(line)
 
 
-def write_machine_file(index, tablet):
+def write_machine_file(tablets, index):
 
     filename = path.join( args.directory,
                           'machine_{}.csv'.format(index) ) 
@@ -87,24 +91,26 @@ def write_machine_file(index, tablet):
     with open(filename, 'w') as fout:
 
         # Write a blank line at the beginning of the machine-readable
-        # file to serve as a tablet delimiter.
+        # file to serve as a tablet delimiter.  Each tablet already ends
+        # with a newline.
 
         fout.write('\n')
 
-        for line in tablet:
-            fout.write(line)
+        for tablet in tablets:
+            for line in tablet:
+                fout.write(line)
 
 
-def write_tablet_files(tablets):
-    for (i, tablet) in enumerate(tablets):
-        write_human_file(i, tablet)
-        write_machine_file(i, tablet)
+def write_tablet_files(tablets, index):
+    write_human_file(tablets, index)
+    write_machine_file(tablets, index)
 
 
 def segment(args):
 
     fin = fileinput.input('-')
     tablets = [ ]
+    index = 1
 
     # Skip all lines up to and including the first blank line in the
     # corpus.
@@ -121,12 +127,13 @@ def segment(args):
         tablets.append(tablet)
 
         if (len(tablets) == args.count):
-            write_tablet_files(tablets)
+            write_tablet_files(tablets, index)
+            index += 1
             tablets = [ ]
 
         tablet = get_next_tablet(fin)
 
-    write_tablet_files(tablets)
+    write_tablet_files(tablets, index)
         
     fin.close()
 

@@ -236,8 +236,18 @@ class Line:
         start = line.find("<<")
         while -1 != start:
             end = line.find(">>", start + 1)
-            if -1 != end:
-                line = line[:start + 1] + line[end + 1:]
+            if -1 == end:
+
+                # Hruh.  No closing angle brackets.  Chances are this
+                # is going to invalidate the line since it'll throw the
+                # line out of alignment with its corresponding lemma.
+                # No really good options here, so we'll just remove
+                # all the angle brackets and hope for the best.
+
+                line = line.translate(None, "<<")
+                break
+
+            line = line[:start + 1] + line[end + 1:]
             start = line.find("<<")
 
         return line;
